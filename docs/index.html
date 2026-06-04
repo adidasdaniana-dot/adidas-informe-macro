@@ -123,6 +123,7 @@
       display: grid; grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
       gap: 18px; margin-bottom: 10px;
     }
+    .chart-card-tall { grid-column: 1 / -1; }
     .chart-card { background: var(--white); border: 1px solid var(--grey-mid); padding: 20px 20px 14px; }
     .chart-card-top {
       display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;
@@ -441,6 +442,19 @@
       </div>
     </div>
 
+    <div class="chart-card chart-card-tall">
+      <div class="chart-card-top">
+        <div><div class="chart-card-title">PBI por Sector de Actividad — Q4 2025</div><div class="chart-source">Fuente: INDEC — Dirección de Cuentas Nacionales</div></div>
+      </div>
+      <div class="time-range" id="range_pbi_sectorial"></div>
+      <div class="chart-container" style="height:440px"><canvas id="canvas_pbi_sectorial"></canvas></div>
+      <div class="insight-box">Intermediación financiera (<strong>+17.2%</strong>) y Agricultura (<strong>+16.1%</strong>) lideran el crecimiento. Industria manufacturera (<strong>−5.0%</strong>) y Comercio (<strong>−2.2%</strong>) registran las mayores caídas. El PBI total creció <strong>+2.06%</strong> en Q4 2025. Fuente: INDEC.</div>
+      <div class="download-group">
+        <button class="btn-download" onclick="downloadChart('pbi_sectorial','PBI_Sector_Q4_2025','PBI por Sector — Q4 2025','INDEC — Dir. Cuentas Nacionales','png')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>PNG</button>
+        <button class="btn-download" onclick="downloadChart('pbi_sectorial','PBI_Sector_Q4_2025','PBI por Sector — Q4 2025','INDEC — Dir. Cuentas Nacionales','jpg')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>JPG</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -546,6 +560,14 @@ var CHARTS = {
       {label:"Indumentaria / APP (%)", data:[22.4,13.4,0.2], color:"#767677", dash:false}
     ]
   }
+  pbi_sectorial: {
+    title: 'PBI por Sector de Actividad — Q4 2025', source: 'INDEC — Dirección de Cuentas Nacionales',
+    type: 'bar_h_conditional', yLabel: '%', granularity: 'sector',
+    labels: ["Intermediación financiera", "Agricultura, ganadería y caza", "Pesca", "Explotación de minas", "Impuestos netos de subsidios", "Electricidad, gas y agua", "Transporte y comunicaciones", "Act. inmobiliarias y empresarial", "Otras actividades servicios", "Construcción", "Enseñanza", "Servicios sociales y de salud", "Hogares privados", "Hoteles y restaurantes", "Adm. pública y defensa", "Comercio mayorista y minorista", "Industria manufacturera"],
+    datasets: [
+      {label:"Var. % interanual", data:[17.2, 16.1, 10.6, 8.1, 5.5, 4.7, 2.2, 2.0, 1.1, 0.9, 0.6, 0.3, 0.0, -0.7, -1.1, -2.2, -5.0], color:"CONDITIONAL_H", dash:false}
+    ]
+  }
 };
 
 // ── Chart.js defaults ─────────────────────────────────────────────────────
@@ -559,12 +581,13 @@ var chartRanges = {};
 
 // ── Build Chart.js config ─────────────────────────────────────────────────
 function buildDatasets(chart, fromIdx, toIdx) {
-  var isBar = chart.type === 'bar' || chart.type === 'bar_conditional';
+  var isBar = chart.type === 'bar' || chart.type === 'bar_conditional' || chart.type === 'bar_h_conditional';
+  var isH = chart.type === 'bar_h_conditional';
   var isMulti = chart.datasets.length > 1;
   return chart.datasets.map(function(ds) {
     var slicedData = ds.data.slice(fromIdx, toIdx + 1);
-    var color = ds.color === 'CONDITIONAL'
-      ? slicedData.map(function(v) { return v === null ? 'transparent' : v < 0 ? '#166534' : v > 5 ? '#991b1b' : '#000000'; })
+    var color = (ds.color === 'CONDITIONAL' || ds.color === 'CONDITIONAL_H')
+      ? slicedData.map(function(v) { return v === null ? 'transparent' : v < 0 ? '#991b1b' : v > 5 ? '#166534' : '#000000'; })
       : ds.color;
     var base = {
       label: ds.label, data: slicedData,
@@ -586,7 +609,7 @@ function buildDatasets(chart, fromIdx, toIdx) {
 
 function buildConfig(chartId, fromIdx, toIdx) {
   var chart = CHARTS[chartId];
-  var isBar = chart.type === 'bar' || chart.type === 'bar_conditional';
+  var isBar = chart.type === 'bar' || chart.type === 'bar_conditional' || chart.type === 'bar_h_conditional';
   var isMulti = chart.datasets.length > 1;
   var labels = chart.labels.slice(fromIdx, toIdx + 1);
   return {
@@ -594,6 +617,7 @@ function buildConfig(chartId, fromIdx, toIdx) {
     data: { labels: labels, datasets: buildDatasets(chart, fromIdx, toIdx) },
     options: {
       responsive: true, maintainAspectRatio: false,
+      indexAxis: isH ? 'y' : 'x',
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: {
@@ -612,10 +636,17 @@ function buildConfig(chartId, fromIdx, toIdx) {
         }
       },
       scales: {
-        x: { grid: { color: '#f0f0f0' }, ticks: { maxRotation: 45, font: { size: 10 } } },
+        x: {
+          grid: { color: '#f0f0f0' },
+          ticks: isH
+            ? { font: { size: 10 }, callback: function(v) { return v + '%'; } }
+            : { maxRotation: 45, font: { size: 10 } }
+        },
         y: {
           grid: { color: '#f0f0f0' },
-          ticks: { font: { size: 10 }, callback: function(v) { return v + (chart.yLabel === '%' ? '%' : ''); } }
+          ticks: isH
+            ? { font: { size: 9 } }
+            : { font: { size: 10 }, callback: function(v) { return v + (chart.yLabel === '%' ? '%' : ''); } }
         }
       }
     }
@@ -625,6 +656,7 @@ function buildConfig(chartId, fromIdx, toIdx) {
 // ── Time range selector ───────────────────────────────────────────────────
 function buildRangeSelector(chartId) {
   var chart = CHARTS[chartId];
+  if (chart.granularity === 'sector') return;
   var container = document.getElementById('range_' + chartId);
   if (!container) return;
 
