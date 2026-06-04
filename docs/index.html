@@ -1143,20 +1143,22 @@ function initMapLabels() {
     var abbr = MAP_ABBREVS[name] || name.split(' ')[0];
     // CABA too small: draw leader line instead (must be BEFORE size filter)
     if (name === 'Ciudad de Buenos Aires') {
-      svg.setAttribute('viewBox', '0 0 415 580');
+      svg.setAttribute('viewBox', '0 0 400 580');
       var ns = 'http://www.w3.org/2000/svg';
       var dot = document.createElementNS(ns,'circle');
       dot.setAttribute('cx',cx); dot.setAttribute('cy',cy); dot.setAttribute('r','2');
       dot.setAttribute('fill','#000'); dot.setAttribute('class','map-label'); dot.style.pointerEvents='none';
       svg.appendChild(dot);
-      var poly = document.createElementNS(ns,'polyline');
-      poly.setAttribute('points', cx+','+cy+' 350,'+cy+' 412,'+cy);
-      poly.setAttribute('stroke','#000'); poly.setAttribute('stroke-width','0.8'); poly.setAttribute('fill','none');
+      var lineEnd = 355;
+      var poly = document.createElementNS(ns,'line');
+      poly.setAttribute('x1',cx); poly.setAttribute('y1',cy);
+      poly.setAttribute('x2',lineEnd); poly.setAttribute('y2',cy);
+      poly.setAttribute('stroke','#000'); poly.setAttribute('stroke-width','0.8');
       poly.setAttribute('class','map-label'); poly.style.pointerEvents='none';
       svg.appendChild(poly);
       var lt = document.createElementNS(ns,'text');
-      lt.setAttribute('x','414'); lt.setAttribute('y', cy+2);
-      lt.setAttribute('font-size','6'); lt.setAttribute('fill','#000'); lt.setAttribute('font-weight','700');
+      lt.setAttribute('x', lineEnd + 3); lt.setAttribute('y', cy + 2);
+      lt.setAttribute('font-size','7'); lt.setAttribute('fill','#000'); lt.setAttribute('font-weight','700');
       lt.setAttribute('font-family','Helvetica,Arial,sans-serif');
       lt.setAttribute('class','map-label'); lt.style.pointerEvents='none';
       lt.textContent = 'CABA ' + pct + '%';
