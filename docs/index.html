@@ -58,18 +58,21 @@
     /* Authors Banner */
     .authors-banner {
       background: var(--white); border-bottom: 2px solid var(--black);
-      padding: 16px 32px; display: flex; align-items: center; gap: 16px;
+      padding: 20px 32px;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 14px; text-align: center;
     }
     .authors-label {
       font-size: 9px; font-weight: 700; text-transform: uppercase;
       letter-spacing: 0.14em; color: var(--grey-dark); white-space: nowrap;
     }
-    .authors-list { display: flex; gap: 20px; align-items: center; }
-    .author { display: flex; align-items: center; gap: 10px; }
+    .authors-list { display: flex; gap: 32px; align-items: center; justify-content: center; }
+    .author { display: flex; align-items: center; gap: 12px; }
     .author-photo {
-      width: 48px; height: 48px; border-radius: 50%;
+      width: 56px; height: 56px; border-radius: 50%;
       border: 2px solid var(--black); overflow: hidden; flex-shrink: 0;
       background: var(--grey-light);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.18), 0 1px 4px rgba(0,0,0,0.10);
     }
     .author-photo img { width: 100%; height: 100%; object-fit: cover; }
     .author-info { display: flex; flex-direction: column; gap: 1px; }
@@ -286,7 +289,6 @@
 <div class="section">
   <div class="section-header">
     <span class="section-title">Sector Calzado e Indumentaria</span>
-    <span class="section-subtitle">Impacto en categorías clave de adidas</span>
   </div>
   <div class="charts-grid">
 
@@ -327,7 +329,6 @@
     <strong>REM-BCRA</strong> — Relevamiento de Expectativas de Mercado, Banco Central de la República Argentina (proyecciones PBI, tipo de cambio)<br>
     <strong>BCRA</strong> — Banco Central de la República Argentina (tipo de cambio de referencia, Comunicación A-3500)
   </div>
-  <div class="footer-copy">Generado automáticamente desde Google Drive · adidas Business Development Argentina · 4 de junio, 2026</div>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>

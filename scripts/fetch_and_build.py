@@ -84,7 +84,7 @@ def download_excel() -> io.BytesIO:
         scopes=["https://www.googleapis.com/auth/drive.readonly"],
     )
     config = json.loads(CONFIG_FILE.read_text())
-    file_id = os.environ.get("SHEET_FILE_ID", config["file_id"])
+    file_id = os.environ["SHEET_FILE_ID"]  # required GitHub Secret
 
     service = build("drive", "v3", credentials=credentials)
     request = service.files().get_media(fileId=file_id)
