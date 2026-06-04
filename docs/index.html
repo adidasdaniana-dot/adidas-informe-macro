@@ -1132,13 +1132,23 @@ var MAP_ABBREVS = {"Buenos Aires": "BsAs", "Ciudad de Buenos Aires": "CABA", "C\
 function initMapLabels() {
   var svg = document.querySelector('#map-card svg');
   if (!svg) return;
+  // Manual centroid overrides (dx/dy relative to bb center) for irregular shapes
+  var LABEL_OFFSET = {
+    'Salta':            { dx:  20, dy:  20 },
+    'Jujuy':            { dx:   0, dy:   5 },
+    'Tucumán':          { dx:   0, dy:   0 },
+    'Santiago del Estero': { dx: 0, dy:  10 },
+    'Misiones':         { dx:   0, dy:   5 }
+  };
   // Remove existing labels
   svg.querySelectorAll('.map-label').forEach(function(el){ el.remove(); });
   svg.querySelectorAll('.prov-path').forEach(function(path) {
     var bb;
     try { bb = path.getBBox(); } catch(e) { return; }
-    var cx = bb.x + bb.width/2, cy = bb.y + bb.height/2;
     var name = path.dataset.name;
+    var off = LABEL_OFFSET[name] || { dx: 0, dy: 0 };
+    var cx = bb.x + bb.width/2  + off.dx;
+    var cy = bb.y + bb.height/2 + off.dy;
     var pct  = path.dataset.pct;
     var abbr = MAP_ABBREVS[name] || name.split(' ')[0];
     // CABA too small: draw leader line instead (must be BEFORE size filter)
