@@ -501,7 +501,7 @@
       <div class="insight-box">
         <strong>Neuquén</strong> gana <strong>+0.42 pp</strong> — efecto Vaca Muerta.
         <strong>Santa Fe</strong> pierde <strong>−0.28 pp</strong> y <strong>Córdoba</strong> <strong>−0.18 pp</strong>.
-        Buenos Aires gana terreno (+0.09 pp). Fuente: INDEC, Cuentas Nacionales.
+        Buenos Aires gana terreno (+0.09 pp). Fuente: CEPAL.
       </div>
       <div class="download-group">
         <button class="btn-download" onclick="downloadChart('pbg_var','PBG_Variacion_2022vs2021','PBG — Variación Participación 2022 vs 2021','INDEC — Dir. Cuentas Nacionales','png')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>PNG</button>
@@ -557,7 +557,8 @@
     <strong>INDEC</strong> — Instituto Nacional de Estadística y Censos de la República Argentina (IPC, inflación por categoría y región)<br>
     <strong>Banco Mundial</strong> — Crecimiento del PBI (datos históricos)<br>
     <strong>REM-BCRA</strong> — Relevamiento de Expectativas de Mercado, Banco Central de la República Argentina (proyecciones PBI, tipo de cambio)<br>
-    <strong>BCRA</strong> — Banco Central de la República Argentina (tipo de cambio de referencia, Comunicación A-3500)
+    <strong>BCRA</strong> — Banco Central de la República Argentina (tipo de cambio de referencia, Comunicación A-3500)<br>
+    <strong>CEPAL</strong> — Comisión Económica para América Latina y el Caribe (Producto Bruto Geográfico provincial)
   </div>
 </footer>
 
@@ -1160,6 +1161,28 @@ function initMapLabels() {
       if (bold) t.setAttribute('font-weight','700');
       t.textContent = content;
       return t;
+    }
+    // CABA too small: draw leader line instead
+    if (name === 'Ciudad de Buenos Aires') {
+      svg.setAttribute('viewBox', '0 0 415 580');
+      var ns = 'http://www.w3.org/2000/svg';
+      var dot = document.createElementNS(ns,'circle');
+      dot.setAttribute('cx',cx); dot.setAttribute('cy',cy); dot.setAttribute('r','2');
+      dot.setAttribute('fill','#000'); dot.setAttribute('class','map-label'); dot.style.pointerEvents='none';
+      svg.appendChild(dot);
+      var poly = document.createElementNS(ns,'polyline');
+      poly.setAttribute('points', cx+','+cy+' 350,'+cy+' 412,'+cy);
+      poly.setAttribute('stroke','#000'); poly.setAttribute('stroke-width','0.8'); poly.setAttribute('fill','none');
+      poly.setAttribute('class','map-label'); poly.style.pointerEvents='none';
+      svg.appendChild(poly);
+      var lt = document.createElementNS(ns,'text');
+      lt.setAttribute('x','414'); lt.setAttribute('y', cy+2);
+      lt.setAttribute('font-size','6'); lt.setAttribute('fill','#000'); lt.setAttribute('font-weight','700');
+      lt.setAttribute('font-family','Helvetica,Arial,sans-serif');
+      lt.setAttribute('class','map-label'); lt.style.pointerEvents='none';
+      lt.textContent = 'CABA ' + pct + '%';
+      svg.appendChild(lt);
+      return;
     }
     g.appendChild(mkText(0, pct + '%', true));
     svg.appendChild(g);
