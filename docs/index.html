@@ -230,6 +230,91 @@
       .kpi-bar { padding: 12px 16px; }
       .charts-grid { grid-template-columns: 1fr; }
     }
+
+    /* ── Color Picker Panel ─────────────────────────────────────────────── */
+    .color-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      z-index: 900;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .color-backdrop.open { opacity: 1; pointer-events: all; }
+
+    .color-panel {
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -46%) scale(0.96);
+      background: #fff;
+      border: 1px solid var(--grey-mid);
+      width: min(440px, 92vw);
+      z-index: 901;
+      opacity: 0; pointer-events: none;
+      transition: transform 0.28s cubic-bezier(.22,.68,0,1.2), opacity 0.25s ease;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.22);
+    }
+    .color-panel.open {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1; pointer-events: all;
+    }
+    .color-panel-header {
+      background: var(--black);
+      color: var(--white);
+      padding: 16px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .color-panel-title {
+      font-size: 10px; font-weight: 900;
+      text-transform: uppercase; letter-spacing: 0.14em;
+    }
+    .color-panel-close {
+      background: none; border: none; color: var(--white);
+      font-size: 18px; cursor: pointer; line-height: 1;
+      opacity: 0.7; padding: 0 0 0 12px;
+      transition: opacity 0.15s;
+    }
+    .color-panel-close:hover { opacity: 1; }
+    .color-panel-body { padding: 24px 20px 20px; }
+    .color-panel-hint {
+      font-size: 10px; color: var(--grey-dark);
+      letter-spacing: 0.04em; margin-bottom: 18px;
+      line-height: 1.5;
+    }
+    .color-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0; border-bottom: 1px solid var(--grey-light);
+    }
+    .color-row:last-child { border-bottom: none; }
+    .color-row-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+    }
+    .color-row-controls { display: flex; align-items: center; gap: 10px; }
+    .color-swatch {
+      width: 28px; height: 28px; border-radius: 2px;
+      border: 1px solid var(--grey-mid); cursor: pointer;
+      transition: transform 0.1s;
+      position: relative; overflow: hidden;
+    }
+    .color-swatch:hover { transform: scale(1.08); }
+    .color-swatch input[type=color] {
+      position: absolute; inset: -4px;
+      width: calc(100% + 8px); height: calc(100% + 8px);
+      opacity: 0; cursor: pointer; border: none; padding: 0;
+    }
+    .color-reset-btn {
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--grey-dark);
+      background: none; border: 1px solid var(--grey-mid);
+      padding: 4px 8px; cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+    }
+    .color-reset-btn:hover { background: var(--black); color: var(--white); border-color: var(--black); }
+    .color-panel-actions {
+      margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;
+    }
+    .chart-card { cursor: pointer; }
+    .chart-card:hover { outline: 2px solid var(--black); }
   </style>
 </head>
 <body>
@@ -670,6 +755,171 @@ function downloadChart(chartId, filename, chartTitle, sourceText, format) {
       + '<span class="kpi-meta">' + k.meta + '</span></div>';
   }).join('');
 })();
+
+
+// ── Color picker panel ────────────────────────────────────────────────────
+var activeColorChartId = null;
+var originalColors = {};
+var colorOverrides = {};
+var conditionalDefaults = { neg: '#166534', mid: '#000000', high: '#991b1b' };
+var conditionalOverrides = {};
+
+Object.keys(CHARTS).forEach(function(id) {
+  originalColors[id] = CHARTS[id].datasets.map(function(ds) { return ds.color; });
+  colorOverrides[id] = CHARTS[id].datasets.map(function(ds) {
+    return ds.color === 'CONDITIONAL' ? null : ds.color;
+  });
+  CHARTS[id].datasets.forEach(function(ds, i) {
+    if (ds.color === 'CONDITIONAL') {
+      conditionalOverrides[id + '_' + i] = Object.assign({}, conditionalDefaults);
+    }
+  });
+});
+
+function getCondColors(chartId, dsIdx, data) {
+  var ov = conditionalOverrides[chartId + '_' + dsIdx] || conditionalDefaults;
+  return data.map(function(v) {
+    return v === null ? 'transparent' : v < 0 ? ov.neg : v > 5 ? ov.high : ov.mid;
+  });
+}
+
+function applyColorsToChart(chartId) {
+  var instance = chartInstances[chartId];
+  var chart = CHARTS[chartId];
+  if (!instance) return;
+  var r = chartRanges[chartId] || { from: 0, to: chart.labels.length - 1 };
+  var isBar = chart.type === 'bar' || chart.type === 'bar_conditional';
+  chart.datasets.forEach(function(ds, i) {
+    if (ds.color === 'CONDITIONAL') {
+      instance.data.datasets[i].backgroundColor = getCondColors(chartId, i, ds.data.slice(r.from, r.to + 1));
+    } else {
+      var c = colorOverrides[chartId][i] || ds.color;
+      if (isBar) { instance.data.datasets[i].backgroundColor = c; }
+      else { instance.data.datasets[i].borderColor = c; instance.data.datasets[i].pointBackgroundColor = c; }
+    }
+  });
+  instance.update();
+}
+
+function openColorPanel(chartId) {
+  activeColorChartId = chartId;
+  var chart = CHARTS[chartId];
+  document.getElementById('colorPanelTitle').textContent = chart.title.toUpperCase();
+  var rows = document.getElementById('colorPanelRows');
+  rows.innerHTML = '';
+  chart.datasets.forEach(function(ds, i) {
+    if (ds.color === 'CONDITIONAL') {
+      var ov = conditionalOverrides[chartId + '_' + i] || conditionalDefaults;
+      [
+        { key:'neg',  label:'Apreciación / negativo', color: ov.neg },
+        { key:'mid',  label:'Normal (0 – 5%)',          color: ov.mid },
+        { key:'high', label:'Alta inflación (> 5%)',    color: ov.high },
+      ].forEach(function(cr) {
+        rows.appendChild(makeColorRow(cr.label, cr.color, function(key, val) {
+          conditionalOverrides[chartId + '_' + i][key] = val;
+          applyColorsToChart(chartId);
+        }.bind(null, cr.key)));
+      });
+    } else {
+      (function(idx) {
+        rows.appendChild(makeColorRow(ds.label, colorOverrides[chartId][idx] || ds.color, function(val) {
+          colorOverrides[chartId][idx] = val;
+          applyColorsToChart(chartId);
+        }));
+      })(i);
+    }
+  });
+  document.getElementById('colorBackdrop').classList.add('open');
+  document.getElementById('colorPanel').classList.add('open');
+}
+
+function makeColorRow(label, color, onChange) {
+  var row = document.createElement('div');
+  row.className = 'color-row';
+  var lbl = document.createElement('span');
+  lbl.className = 'color-row-label';
+  lbl.textContent = label;
+  var swatch = document.createElement('div');
+  swatch.className = 'color-swatch';
+  swatch.style.background = color;
+  var inp = document.createElement('input');
+  inp.type = 'color';
+  inp.value = /^#[0-9a-f]{6}$/i.test(color) ? color : '#000000';
+  inp.addEventListener('input', function() {
+    swatch.style.background = inp.value;
+    onChange(inp.value);
+  });
+  swatch.appendChild(inp);
+  row.appendChild(lbl);
+  row.appendChild(swatch);
+  return row;
+}
+
+function closeColorPanel() {
+  document.getElementById('colorBackdrop').classList.remove('open');
+  document.getElementById('colorPanel').classList.remove('open');
+  activeColorChartId = null;
+}
+
+function resetAllColors() {
+  var chartId = activeColorChartId;
+  if (!chartId) return;
+  CHARTS[chartId].datasets.forEach(function(ds, i) {
+    colorOverrides[chartId][i] = ds.color === 'CONDITIONAL' ? null : originalColors[chartId][i];
+    if (ds.color === 'CONDITIONAL') {
+      conditionalOverrides[chartId + '_' + i] = Object.assign({}, conditionalDefaults);
+    }
+  });
+  applyColorsToChart(chartId);
+  openColorPanel(chartId);
+}
+
+// Click on chart card to open panel (ignore clicks on controls)
+document.addEventListener('click', function(e) {
+  var card = e.target.closest('.chart-card');
+  if (!card) return;
+  if (e.target.closest('.btn-download, .time-range, select, button')) return;
+  var canvas = card.querySelector('canvas');
+  if (!canvas) return;
+  openColorPanel(canvas.id.replace('canvas_', ''));
+});
+
+// Patch buildDatasets to apply color overrides
+var _origBuild = buildDatasets;
+buildDatasets = function(chart, fromIdx, toIdx) {
+  var sets = _origBuild(chart, fromIdx, toIdx);
+  var chartId = null;
+  Object.keys(CHARTS).forEach(function(id) { if (CHARTS[id] === chart) chartId = id; });
+  if (!chartId || !colorOverrides[chartId]) return sets;
+  var isBar = chart.type === 'bar' || chart.type === 'bar_conditional';
+  sets.forEach(function(ds, i) {
+    var origDs = chart.datasets[i];
+    if (origDs.color === 'CONDITIONAL') {
+      ds.backgroundColor = getCondColors(chartId, i, ds.data);
+    } else if (colorOverrides[chartId][i]) {
+      var c = colorOverrides[chartId][i];
+      if (isBar) ds.backgroundColor = c;
+      else { ds.borderColor = c; ds.pointBackgroundColor = c; }
+    }
+  });
+  return sets;
+};
+
 </script>
+
+<div class="color-backdrop" id="colorBackdrop" onclick="closeColorPanel()"></div>
+<div class="color-panel" id="colorPanel">
+  <div class="color-panel-header">
+    <span class="color-panel-title" id="colorPanelTitle">Personalizar colores</span>
+    <button class="color-panel-close" onclick="closeColorPanel()">&#x2715;</button>
+  </div>
+  <div class="color-panel-body">
+    <p class="color-panel-hint">Hacé clic en el color para cambiarlo. Los cambios se reflejan en el gráfico y en la descarga.</p>
+    <div id="colorPanelRows"></div>
+    <div class="color-panel-actions">
+      <button class="color-reset-btn" onclick="resetAllColors()">Restablecer original</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
