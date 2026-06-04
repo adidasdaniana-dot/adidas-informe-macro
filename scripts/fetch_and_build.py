@@ -326,29 +326,6 @@ def build_chart_payload(ipc, devaluation, pbi, fx, disc):
                     "insight": insights.get("ipc_nacional", ""),
                 },
                 {
-                    "id": "ipc_comparativo",
-                    "title": "Prendas y Calzado vs. Inflación General",
-                    "source": "INDEC",
-                    "labels": [r["date"] for r in ipc],
-                    "datasets": [
-                        {
-                            "label": "Nacional (%)",
-                            "data": [r["inflacion_nacional"] for r in ipc],
-                            "color": "#000000",
-                            "dash": False,
-                        },
-                        {
-                            "label": "Prendas y Calzado (%)",
-                            "data": [r["inflacion_calzado"] for r in ipc],
-                            "color": "#767677",
-                            "dash": False,
-                        },
-                    ],
-                    "type": "line",
-                    "yLabel": "%",
-                    "insight": insights.get("ipc_comparativo", ""),
-                },
-                {
                     "id": "pbi",
                     "title": "Crecimiento del PBI Argentina",
                     "source": "Banco Mundial / REM-BCRA",
@@ -417,6 +394,29 @@ def build_chart_payload(ipc, devaluation, pbi, fx, disc):
             "section": "Sector Calzado e Indumentaria",
             "subtitle": "Impacto en categorías clave de adidas",
             "charts": [
+                {
+                    "id": "ipc_comparativo",
+                    "title": "Prendas y Calzado vs. Inflación General",
+                    "source": "INDEC",
+                    "labels": [r["date"] for r in ipc],
+                    "datasets": [
+                        {
+                            "label": "Nacional (%)",
+                            "data": [r["inflacion_nacional"] for r in ipc],
+                            "color": "#000000",
+                            "dash": False,
+                        },
+                        {
+                            "label": "Prendas y Calzado (%)",
+                            "data": [r["inflacion_calzado"] for r in ipc],
+                            "color": "#767677",
+                            "dash": False,
+                        },
+                    ],
+                    "type": "line",
+                    "yLabel": "%",
+                    "insight": insights.get("ipc_comparativo", ""),
+                },
                 {
                     "id": "discriminada",
                     "title": "Inflación Acumulada Anual — Calzado y APP",
