@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Informe Macroeconómico — adidas</title>
+  <style>
+    :root {
+      --black: #000000;
+      --white: #ffffff;
+      --grey-light: #f5f5f5;
+      --grey-mid: #e0e0e0;
+      --grey-dark: #767677;
+      --green: #166534;
+      --red: #991b1b;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: #fafafa;
+      color: var(--black);
+      font-size: 13px;
+    }
+    header {
+      background: var(--black);
+      color: var(--white);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .header-left { display: flex; align-items: center; gap: 20px; }
+    .adidas-logo {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 28px;
+    }
+    .adidas-logo span {
+      display: block;
+      width: 7px;
+      background: white;
+      border-radius: 1px;
+    }
+    .adidas-logo span:nth-child(1) { height: 14px; }
+    .adidas-logo span:nth-child(2) { height: 21px; }
+    .adidas-logo span:nth-child(3) { height: 28px; }
+    .header-titles { display: flex; flex-direction: column; gap: 3px; }
+    .wordmark { font-size: 18px; font-weight: 900; letter-spacing: -0.02em; line-height: 1; }
+    .report-title { font-size: 10px; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.65; }
+    .header-right { text-align: right; font-size: 10px; opacity: 0.5; letter-spacing: 0.05em; }
+    .kpi-bar {
+      background: var(--white);
+      border-bottom: 1px solid var(--grey-mid);
+      padding: 14px 32px;
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+    }
+    .kpi {
+      display: flex; flex-direction: column; gap: 2px;
+      padding: 4px 24px 4px 0; margin-right: 24px;
+      border-right: 1px solid var(--grey-mid);
+      min-width: 110px;
+    }
+    .kpi:last-child { border-right: none; }
+    .kpi-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--grey-dark); }
+    .kpi-value { font-size: 22px; font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; }
+    .kpi-meta { font-size: 10px; color: var(--grey-dark); margin-top: 1px; }
+    .positive { color: var(--green); }
+    .negative { color: var(--red); }
+    .section { padding: 28px 32px 0; }
+    .section-header {
+      display: flex; align-items: baseline; gap: 16px;
+      margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--black);
+    }
+    .section-title { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.16em; }
+    .section-subtitle { font-size: 10px; color: var(--grey-dark); letter-spacing: 0.04em; }
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+      gap: 18px; margin-bottom: 10px;
+    }
+    .chart-card { background: var(--white); border: 1px solid var(--grey-mid); padding: 22px 22px 16px; }
+    .chart-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+    .chart-card-title { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em; }
+    .chart-source { font-size: 9px; color: var(--grey-dark); letter-spacing: 0.04em; margin-top: 2px; }
+    .chart-container { position: relative; height: 230px; }
+    .insight-box {
+      background: var(--grey-light); border-left: 3px solid var(--black);
+      padding: 9px 12px; margin-top: 12px; font-size: 11px; line-height: 1.65; color: #333;
+    }
+    .btn-download {
+      display: inline-flex; align-items: center; gap: 6px; margin-top: 10px;
+      padding: 6px 13px; background: transparent; border: 1.5px solid var(--black);
+      color: var(--black); font-family: inherit; font-size: 9px; font-weight: 900;
+      letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+    }
+    .btn-download:hover { background: var(--black); color: var(--white); }
+    .btn-download svg { width: 11px; height: 11px; flex-shrink: 0; }
+    footer { margin-top: 36px; padding: 20px 32px; border-top: 1px solid var(--grey-mid); background: var(--white); }
+    .footer-label { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px; }
+    .footer-sources { font-size: 10px; color: var(--grey-dark); line-height: 1.9; }
+    .footer-copy { font-size: 9px; color: var(--grey-mid); margin-top: 12px; letter-spacing: 0.04em; }
+    @media (max-width: 780px) {
+      header { padding: 14px 16px; }
+      .section { padding: 20px 16px 0; }
+      .kpi-bar { padding: 12px 16px; }
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="adidas-logo" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="header-titles">
+      <div class="wordmark">adidas</div>
+      <div class="report-title">Informe Macroeconómico · Argentina</div>
+    </div>
+  </div>
+  <div class="header-right">
+    Última actualización<br>
+    <strong>4 de junio, 2026 — datos al 30 de abril 2026</strong>
+  </div>
+</header>
+
+<div class="kpi-bar" id="kpi-bar"></div>
+
+<!-- Section 1 -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-title">Contexto Macroeconómico</span>
+    <span class="section-subtitle">Argentina · INDEC / Banco Mundial / REM-BCRA</span>
+  </div>
+  <div class="charts-grid">
+
+    <div class="chart-card">
+      <div class="chart-card-top">
+        <div>
+          <div class="chart-card-title">IPC — Inflación Mensual Nacional</div>
+          <div class="chart-source">Fuente: INDEC</div>
+        </div>
+      </div>
+      <div class="chart-container"><canvas id="canvas_ipc_nacional"></canvas></div>
+      <div class="insight-box">
+        Pico: <strong>4.2%</strong> (ago-24). Mínimo: <strong>1.5%</strong> (may-25). Último dato: <strong>2.6%</strong> (abr-26).
+        La inflación mensual mostró tendencia descendente durante 2024 antes de estabilizarse en torno al 2–3% en 2026.
+      </div>
+      <button class="btn-download" onclick="downloadChart('ipc_nacional','IPC_Inflacion_Mensual_Nacional')">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M6 1v7M3 6l3 3 3-3M1 10h10"/>
+        </svg>
+        Descargar PNG
+      </button>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-card-top">
+        <div>
+          <div class="chart-card-title">Prendas y Calzado vs. Inflación General</div>
+          <div class="chart-source">Fuente: INDEC</div>
+        </div>
+      </div>
+      <div class="chart-container"><canvas id="canvas_ipc_comparativo"></canvas></div>
+      <div class="insight-box">
+        La inflación en prendas y calzado es más volátil que el índice general. Pico sectorial: <strong>6.0%</strong> (sep-24).
+        Deflación puntual en jul-25 (-0.9%). Convergencia hacia el índice general a partir de 2026.
+      </div>
+      <button class="btn-download" onclick="downloadChart('ipc_comparativo','Prendas_Calzado_vs_General')">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M6 1v7M3 6l3 3 3-3M1 10h10"/>
+        </svg>
+        Descargar PNG
+      </button>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-card-top">
+        <div>
+          <div class="chart-card-title">Crecimiento del PBI Argentina</div>
+          <div class="chart-source">Fuente: Banco Mundial / REM-BCRA</div>
+        </div>
+      </div>
+      <div class="chart-container"><canvas id="canvas_pbi"></canvas></div>
+      <div class="insight-box">
+        Tras la caída de <strong>-9.9%</strong> en 2020 y <strong>-1.9%</strong> en 2023,
+        Argentina cerró 2025 con <strong>+4.4%</strong>. El REM-BCRA proyecta <strong>+3.4%</strong> para 2026
+        y expansión sostenida hasta 2028.
+      </div>
+      <button class="btn-download" onclick="downloadChart('pbi','PBI_Crecimiento_Argentina')">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M6 1v7M3 6l3 3 3-3M1 10h10"/>
+        </svg>
+        Descargar PNG
+      </button>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-card-top">
+        <div>
+          <div class="chart-card-title">Tipo de Cambio ARS / USD</div>
+          <div class="chart-source">Fuente: BCRA / REM-BCRA</div>
+        </div>
+      </div>
+      <div class="chart-container"><canvas id="canvas_fx_rate"></canvas></div>
+      <div class="insight-box">
+        El ARS/USD pasó de <strong>$924</strong> (jul-24) a <strong>$1,381</strong> (abr-26),
+        con apreciación del peso desde noviembre 2025. El REM-BCRA proyecta <strong>$1,572</strong> para sep-26,
+        implicando menor tasa de depreciación.
+      </div>
+      <button class="btn-download" onclick="downloadChart('fx_rate','Tipo_de_Cambio_ARS_USD')">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M6 1v7M3 6l3 3 3-3M1 10h10"/>
+        </svg>
+        Descargar PNG
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Section 2 -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-title">Sector Calzado e Indumentaria</span>
+    <span class="section-subtitle">Impacto en categorías clave de adidas</span>
+  </div>
+  <div class="charts-grid">
+
+    <div class="chart-card">
+      <div class="chart-card-top">
+        <div>
+          <div class="chart-card-title">Devaluación Mensual del Peso</div>
+          <div class="chart-source">Fuente: BCRA / REM-BCRA</div>
+        </div>
+      </div>
+      <div class="chart-container"><canvas id="canvas_devaluacion"></canvas></div>
+      <div class="insight-box">
+        La devaluación mensual se aceleró a <strong>7.25%</strong> en jul-25 post-salida del crawling peg.
+        Desde nov-25 registra valores negativos (apreciación del peso), alcanzando <strong>-2.74%</strong> en feb-26.
+        Último dato: <strong>-1.07%</strong> (abr-26). <span style="color:var(--green)">Verde</span> = apreciación.
+      </div>
+      <button class="btn-download" onclick="downloadChart('devaluacion','Devaluacion_Mensual_Peso')">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M6 1v7M3 6l3 3 3-3M1 10h10"/>
+        </svg>
+        Descargar PNG
+      </button>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-card-top">
+        <div>
+          <div class="chart-card-title">Inflación Acumulada Anual — Calzado y APP</div>
+          <div class="chart-source">Fuente: INDEC (discriminada por región)</div>
+        </div>
+      </div>
+      <div class="chart-container"><canvas id="canvas_discriminada"></canvas></div>
+      <div class="insight-box">
+        La inflación acumulada en calzado bajó de <strong>17.3%</strong> (sem2 2024) a <strong>13.5%</strong> (2025 completo).
+        Indumentaria y accesorios (APP) mostró la mayor desaceleración: de <strong>22.4%</strong> a <strong>13.4%</strong>.
+        2026 incluye solo enero–febrero.
+      </div>
+      <button class="btn-download" onclick="downloadChart('discriminada','Inflacion_Acumulada_Calzado_APP')">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M6 1v7M3 6l3 3 3-3M1 10h10"/>
+        </svg>
+        Descargar PNG
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="footer-label">Fuentes de datos</div>
+  <div class="footer-sources">
+    <strong>INDEC</strong> — Instituto Nacional de Estadística y Censos de la República Argentina (IPC, inflación por categoría y región)<br>
+    <strong>Banco Mundial</strong> — Crecimiento del PBI (datos históricos)<br>
+    <strong>REM-BCRA</strong> — Relevamiento de Expectativas de Mercado, Banco Central de la República Argentina (proyecciones PBI, tipo de cambio)<br>
+    <strong>BCRA</strong> — Banco Central de la República Argentina (tipo de cambio de referencia, Comunicación A-3500)
+  </div>
+  <div class="footer-copy">Generado automáticamente desde Google Drive · adidas Business Development · 4 de junio, 2026</div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+Chart.defaults.font.family = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#555';
+
+const CHART_DATA = [
+  {
+    "section": "Contexto Macroeconómico",
+    "subtitle": "Argentina · INDEC / Banco Mundial / REM-BCRA",
+    "charts": [
+      {
+        "id": "ipc_nacional",
+        "title": "IPC — Inflación Mensual Nacional",
+        "source": "INDEC",
+        "type": "line",
+        "yLabel": "%",
+        "labels": ["jul-24","ago-24","sep-24","oct-24","nov-24","dic-24","ene-25","feb-25","mar-25","abr-25","may-25","jun-25","jul-25","ago-25","sep-25","oct-25","nov-25","dic-25","ene-26","feb-26","mar-26","abr-26"],
+        "datasets": [
+          {"label":"Inflación (%)","data":[4.0,4.2,3.5,2.7,2.4,2.7,2.2,2.4,3.7,2.8,1.5,1.6,1.9,1.9,2.1,2.3,2.5,2.8,2.9,2.9,3.4,2.6],"color":"#000000","dash":false}
+        ]
+      },
+      {
+        "id": "ipc_comparativo",
+        "title": "Prendas y Calzado vs. Inflación General",
+        "source": "INDEC",
+        "type": "line",
+        "yLabel": "%",
+        "labels": ["jul-24","ago-24","sep-24","oct-24","nov-24","dic-24","ene-25","feb-25","mar-25","abr-25","may-25","jun-25","jul-25","ago-25","sep-25","oct-25","nov-25","dic-25","ene-26","feb-26","mar-26","abr-26"],
+        "datasets": [
+          {"label":"Nacional (%)","data":[4.0,4.2,3.5,2.7,2.4,2.7,2.2,2.4,3.7,2.8,1.5,1.6,1.9,1.9,2.1,2.3,2.5,2.8,2.9,2.9,3.4,2.6],"color":"#000000","dash":false},
+          {"label":"Prendas y Calzado (%)","data":[1.6,2.1,6.0,4.4,1.9,1.6,-0.7,0.4,4.6,3.8,0.9,0.5,-0.9,-0.3,2.1,2.4,0.5,1.1,-0.5,0.0,3.1,3.2],"color":"#767677","dash":false}
+        ]
+      },
+      {
+        "id": "pbi",
+        "title": "Crecimiento del PBI Argentina",
+        "source": "Banco Mundial / REM-BCRA",
+        "type": "bar",
+        "yLabel": "%",
+        "labels": ["2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025","2026","2027","2028"],
+        "datasets": [
+          {"label":"Real (%)","data":[-2.5,2.7,-2.1,2.8,-2.6,-2.0,-9.9,10.4,6.0,-1.9,-1.3,4.4,null,null,null],"color":"#000000","dash":false},
+          {"label":"Proyección (%)","data":[null,null,null,null,null,null,null,null,null,null,null,null,3.4,3.1,3.1],"color":"#aaaaaa","dash":true}
+        ]
+      },
+      {
+        "id": "fx_rate",
+        "title": "Tipo de Cambio ARS / USD",
+        "source": "BCRA / REM-BCRA",
+        "type": "line",
+        "yLabel": "ARS",
+        "labels": ["jul-24","ago-24","sep-24","oct-24","nov-24","dic-24","ene-25","feb-25","mar-25","abr-25","may-25","jun-25","jul-25","ago-25","sep-25","oct-25","nov-25","dic-25","ene-26","feb-26","mar-26","abr-26","may-26","jun-26","jul-26","ago-26","sep-26"],
+        "datasets": [
+          {"label":"ARS/USD (real)","data":[923.77,942.92,961.83,981.57,1001.84,1020.71,1043.56,1058.46,1069.03,1121.57,1147.53,1181.36,1267.02,1329.54,1399.90,1432.02,1427.62,1447.84,1449.33,1409.66,1396.34,1381.45,null,null,null,null,null],"color":"#000000","dash":false},
+          {"label":"ARS/USD (proyección)","data":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1381.45,1449,1481,1504,1533,1572],"color":"#aaaaaa","dash":true}
+        ]
+      }
+    ]
+  },
+  {
+    "section": "Sector Calzado e Indumentaria",
+    "subtitle": "Impacto en categorías clave de adidas",
+    "charts": [
+      {
+        "id": "devaluacion",
+        "title": "Devaluación Mensual del Peso",
+        "source": "BCRA / REM-BCRA",
+        "type": "bar_conditional",
+        "yLabel": "%",
+        "labels": ["jul-24","ago-24","sep-24","oct-24","nov-24","dic-24","ene-25","feb-25","mar-25","abr-25","may-25","jun-25","jul-25","ago-25","sep-25","oct-25","nov-25","dic-25","ene-26","feb-26","mar-26","abr-26"],
+        "datasets": [
+          {"label":"Devaluación (%)","data":[2.21,2.07,2.00,2.05,2.07,1.88,2.24,1.43,1.00,4.91,2.31,2.95,7.25,4.93,5.29,2.29,-0.31,1.42,0.10,-2.74,-0.94,-1.07],"color":"CONDITIONAL","dash":false}
+        ]
+      },
+      {
+        "id": "discriminada",
+        "title": "Inflación Acumulada Anual — Calzado y APP",
+        "source": "INDEC (discriminada por región)",
+        "type": "bar",
+        "yLabel": "%",
+        "labels": ["2024 (jul–dic)","2025","2026 (ene–feb)"],
+        "datasets": [
+          {"label":"Calzado (%)","data":[17.3,13.5,4.9],"color":"#000000","dash":false},
+          {"label":"Indumentaria / APP (%)","data":[22.4,13.4,0.2],"color":"#767677","dash":false}
+        ]
+      }
+    ]
+  }
+];
+
+const chartInstances = {};
+
+function buildConfig(chart) {
+  const isBar = chart.type === 'bar' || chart.type === 'bar_conditional';
+  const isConditional = chart.type === 'bar_conditional';
+  const isMulti = chart.datasets.length > 1;
+
+  const datasets = chart.datasets.map((ds) => {
+    const color = ds.color === 'CONDITIONAL'
+      ? ds.data.map(v => v === null ? 'transparent' : v < 0 ? '#166534' : v > 5 ? '#991b1b' : '#000000')
+      : ds.color;
+
+    const base = {
+      label: ds.label,
+      data: ds.data,
+      borderWidth: isBar ? 0 : 2,
+      pointRadius: isBar ? 0 : 3,
+      pointHoverRadius: 5,
+      tension: 0.25,
+      fill: false,
+      spanGaps: true,
+    };
+
+    if (isBar) {
+      base.backgroundColor = color;
+      base.borderSkipped = false;
+      base.barPercentage = isMulti ? 0.8 : 0.65;
+    } else {
+      base.borderColor = typeof color === 'string' ? color : '#000000';
+      base.backgroundColor = 'transparent';
+      base.borderDash = ds.dash ? [6, 4] : [];
+      base.pointBackgroundColor = typeof color === 'string' ? color : '#000000';
+    }
+    return base;
+  });
+
+  return {
+    type: isBar ? 'bar' : 'line',
+    data: { labels: chart.labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          display: isMulti,
+          position: 'top',
+          align: 'end',
+          labels: { boxWidth: 12, boxHeight: 2, padding: 12, usePointStyle: false },
+        },
+        tooltip: {
+          backgroundColor: '#000',
+          titleColor: '#fff',
+          bodyColor: '#ccc',
+          padding: 10,
+          callbacks: {
+            label: function(ctx) {
+              const v = ctx.parsed.y;
+              if (v === null || v === undefined) return null;
+              const unit = chart.yLabel === '%' ? '%' : (' ' + chart.yLabel);
+              return ' ' + ctx.dataset.label + ': ' + v + unit;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: '#f0f0f0' },
+          ticks: { maxRotation: 45, font: { size: 10 } }
+        },
+        y: {
+          grid: { color: '#f0f0f0' },
+          ticks: {
+            font: { size: 10 },
+            callback: function(v) { return v + (chart.yLabel === '%' ? '%' : ''); }
+          }
+        }
+      }
+    }
+  };
+}
+
+// Initialize charts
+CHART_DATA.forEach(function(section) {
+  section.charts.forEach(function(chart) {
+    var canvas = document.getElementById('canvas_' + chart.id);
+    if (!canvas) return;
+    chartInstances[chart.id] = new Chart(canvas, buildConfig(chart));
+  });
+});
+
+// Download PNG
+function downloadChart(chartId, filename) {
+  var chart = chartInstances[chartId];
+  if (!chart) return;
+  var url = chart.toBase64Image('image/png', 1.0);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'adidas_' + filename + '.png';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+// KPI bar
+(function() {
+  var kpis = [
+    { label: 'IPC abr-26', value: '2.6%', meta: 'inflación mensual', cls: '' },
+    { label: 'PBI 2025', value: '+4.4%', meta: 'crecimiento real', cls: 'positive' },
+    { label: 'ARS/USD abr-26', value: '$1,381', meta: 'tipo de cambio', cls: '' },
+    { label: 'Devaluación abr-26', value: '-1.1%', meta: 'apreciación del peso', cls: 'positive' },
+    { label: 'Calzado 2025', value: '13.5%', meta: 'inflación acumulada', cls: '' },
+    { label: 'PBI 2026 proy.', value: '+3.4%', meta: 'REM-BCRA', cls: 'positive' },
+  ];
+  var bar = document.getElementById('kpi-bar');
+  bar.innerHTML = kpis.map(function(k) {
+    return '<div class="kpi"><span class="kpi-label">' + k.label + '</span>'
+         + '<span class="kpi-value ' + k.cls + '">' + k.value + '</span>'
+         + '<span class="kpi-meta">' + k.meta + '</span></div>';
+  }).join('');
+})();
+</script>
+</body>
+</html>

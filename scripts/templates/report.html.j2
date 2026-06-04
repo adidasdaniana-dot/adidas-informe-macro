@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Informe Macroeconómico — adidas</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --black: #000000;
+      --white: #ffffff;
+      --grey-light: #f5f5f5;
+      --grey-mid: #e0e0e0;
+      --grey-dark: #767677;
+      --green: #166534;
+      --red: #991b1b;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: #fafafa;
+      color: var(--black);
+      font-size: 13px;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────── */
+    header {
+      background: var(--black);
+      color: var(--white);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .header-left { display: flex; align-items: center; gap: 20px; }
+    .adidas-logo {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 28px;
+    }
+    .adidas-logo span {
+      display: block;
+      width: 7px;
+      background: white;
+      border-radius: 1px;
+    }
+    .adidas-logo span:nth-child(1) { height: 14px; }
+    .adidas-logo span:nth-child(2) { height: 21px; }
+    .adidas-logo span:nth-child(3) { height: 28px; }
+    .header-titles { display: flex; flex-direction: column; gap: 3px; }
+    .wordmark {
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .report-title {
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      opacity: 0.65;
+    }
+    .header-right {
+      text-align: right;
+      font-size: 10px;
+      opacity: 0.5;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── KPI Bar ────────────────────────────────────────────────────── */
+    .kpi-bar {
+      background: var(--white);
+      border-bottom: 1px solid var(--grey-mid);
+      padding: 14px 32px;
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+    }
+    .kpi {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 4px 24px 4px 0;
+      margin-right: 24px;
+      border-right: 1px solid var(--grey-mid);
+      min-width: 110px;
+    }
+    .kpi:last-child { border-right: none; }
+    .kpi-label {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--grey-dark);
+    }
+    .kpi-value {
+      font-size: 22px;
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+    .kpi-meta {
+      font-size: 10px;
+      color: var(--grey-dark);
+      margin-top: 1px;
+    }
+    .positive { color: var(--green); }
+    .negative { color: var(--red); }
+
+    /* ── Sections ───────────────────────────────────────────────────── */
+    .section { padding: 28px 32px 0; }
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--black);
+    }
+    .section-title {
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+    }
+    .section-subtitle {
+      font-size: 10px;
+      color: var(--grey-dark);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Chart Grid ─────────────────────────────────────────────────── */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+      gap: 18px;
+      margin-bottom: 10px;
+    }
+    .chart-card {
+      background: var(--white);
+      border: 1px solid var(--grey-mid);
+      padding: 22px 22px 16px;
+    }
+    .chart-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+    .chart-card-title {
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    .chart-source {
+      font-size: 9px;
+      color: var(--grey-dark);
+      letter-spacing: 0.04em;
+      margin-top: 2px;
+    }
+    .chart-container { position: relative; height: 230px; }
+    .insight-box {
+      background: var(--grey-light);
+      border-left: 3px solid var(--black);
+      padding: 9px 12px;
+      margin-top: 12px;
+      font-size: 11px;
+      line-height: 1.65;
+      color: #333;
+    }
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      padding: 6px 13px;
+      background: transparent;
+      border: 1.5px solid var(--black);
+      color: var(--black);
+      font-family: inherit;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+    }
+    .btn-download:hover { background: var(--black); color: var(--white); }
+    .btn-download svg { width: 11px; height: 11px; flex-shrink: 0; }
+
+    /* ── Footer ─────────────────────────────────────────────────────── */
+    footer {
+      margin-top: 36px;
+      padding: 20px 32px;
+      border-top: 1px solid var(--grey-mid);
+      background: var(--white);
+    }
+    .footer-label {
+      font-size: 9px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 6px;
+    }
+    .footer-sources {
+      font-size: 10px;
+      color: var(--grey-dark);
+      line-height: 1.9;
+    }
+    .footer-copy {
+      font-size: 9px;
+      color: var(--grey-mid);
+      margin-top: 12px;
+      letter-spacing: 0.04em;
+    }
+
+    @media (max-width: 780px) {
+      header { padding: 14px 16px; }
+      .section { padding: 20px 16px 0; }
+      .kpi-bar { padding: 12px 16px; gap: 12px; }
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="adidas-logo" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="header-titles">
+      <div class="wordmark">adidas</div>
+      <div class="report-title">Informe Macroeconómico · Argentina</div>
+    </div>
+  </div>
+  <div class="header-right">
+    Última actualización<br>
+    <strong>{{ generated_at }}</strong>
+  </div>
+</header>
+
+<div class="kpi-bar" id="kpi-bar">
+  <!-- Populated by JS from CHART_DATA -->
+</div>
+
+{% for section in sections %}
+<div class="section">
+  <div class="section-header">
+    <span class="section-title">{{ section.section }}</span>
+    <span class="section-subtitle">{{ section.subtitle }}</span>
+  </div>
+  <div class="charts-grid">
+    {% for chart in section.charts %}
+    <div class="chart-card">
+      <div class="chart-card-top">
+        <div>
+          <div class="chart-card-title">{{ chart.title }}</div>
+          <div class="chart-source">Fuente: {{ chart.source }}</div>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="canvas_{{ chart.id }}"></canvas>
+      </div>
+      {% if chart.insight %}
+      <div class="insight-box">{{ chart.insight }}</div>
+      {% endif %}
+      <button class="btn-download" onclick="downloadChart('{{ chart.id }}', '{{ chart.title }}')">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M6 1v7M3 6l3 3 3-3M1 10h10"/>
+        </svg>
+        Descargar PNG
+      </button>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endfor %}
+
+<footer>
+  <div class="footer-label">Fuentes de datos</div>
+  <div class="footer-sources">
+    <strong>INDEC</strong> — Instituto Nacional de Estadística y Censos de la República Argentina (IPC, inflación por categoría y región)<br>
+    <strong>Banco Mundial</strong> — Crecimiento del PBI (datos históricos)<br>
+    <strong>REM-BCRA</strong> — Relevamiento de Expectativas de Mercado, Banco Central de la República Argentina (proyecciones PBI, tipo de cambio)<br>
+    <strong>BCRA</strong> — Banco Central de la República Argentina (tipo de cambio de referencia, Comunicación A-3500)
+  </div>
+  <div class="footer-copy">Generado automáticamente · adidas Business Development · {{ generated_at }}</div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+const CHART_DATA = {{ chart_data_json }};
+
+const PALETTE = {
+  black: '#000000',
+  grey:  '#767677',
+  lgrey: '#aaaaaa',
+  green: '#166534',
+  red:   '#991b1b',
+};
+
+Chart.defaults.font.family = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#555';
+
+const chartInstances = {};
+
+function buildConfig(chart) {
+  const isBar = chart.type === 'bar' || chart.type === 'bar_conditional';
+  const isConditional = chart.type === 'bar_conditional';
+  const isMulti = chart.datasets.length > 1;
+
+  const datasets = chart.datasets.map((ds, i) => {
+    const color = ds.color === 'CONDITIONAL'
+      ? ds.data.map(v => v === null ? 'transparent' : v < 0 ? PALETTE.green : v > 5 ? PALETTE.red : PALETTE.black)
+      : ds.color;
+
+    const base = {
+      label: ds.label,
+      data: ds.data,
+      borderWidth: isBar ? 0 : 2,
+      pointRadius: isBar ? 0 : 3,
+      pointHoverRadius: 5,
+      tension: 0.25,
+      fill: false,
+      spanGaps: true,
+    };
+
+    if (isBar) {
+      base.backgroundColor = color;
+      base.borderSkipped = false;
+      base.barPercentage = 0.7;
+    } else {
+      base.borderColor = typeof color === 'string' ? color : PALETTE.black;
+      base.backgroundColor = 'transparent';
+      base.borderDash = ds.dash ? [6, 4] : [];
+      base.pointBackgroundColor = typeof color === 'string' ? color : PALETTE.black;
+    }
+    return base;
+  });
+
+  return {
+    type: isBar ? 'bar' : 'line',
+    data: { labels: chart.labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          display: isMulti,
+          position: 'top',
+          align: 'end',
+          labels: { boxWidth: 12, boxHeight: 2, padding: 12, usePointStyle: false },
+        },
+        tooltip: {
+          backgroundColor: '#000',
+          titleColor: '#fff',
+          bodyColor: '#ccc',
+          padding: 10,
+          callbacks: {
+            label: ctx => {
+              const v = ctx.parsed.y;
+              if (v === null || v === undefined) return null;
+              const unit = chart.yLabel === '%' ? '%' : ` ${chart.yLabel}`;
+              return ` ${ctx.dataset.label}: ${v}${unit}`;
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: { color: '#f0f0f0' },
+          ticks: { maxRotation: 45, font: { size: 10 } },
+        },
+        y: {
+          grid: { color: '#f0f0f0' },
+          ticks: {
+            font: { size: 10 },
+            callback: v => v + (chart.yLabel === '%' ? '%' : ''),
+          },
+        },
+      },
+    },
+  };
+}
+
+// Initialize all charts
+CHART_DATA.forEach(section => {
+  section.charts.forEach(chart => {
+    const canvas = document.getElementById('canvas_' + chart.id);
+    if (!canvas) return;
+    chartInstances[chart.id] = new Chart(canvas, buildConfig(chart));
+  });
+});
+
+// Download PNG
+function downloadChart(chartId, title) {
+  const chart = chartInstances[chartId];
+  if (!chart) return;
+  const url = chart.toBase64Image('image/png', 1.0);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'adidas_' + title.replace(/[^a-z0-9áéíóúñ\s]/gi, '').replace(/\s+/g, '_').toLowerCase() + '.png';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+// KPI bar — derived from latest data points
+(function buildKPIs() {
+  const kpiDefs = [];
+  CHART_DATA.forEach(section => {
+    section.charts.forEach(chart => {
+      if (chart.id === 'ipc_nacional') {
+        const vals = chart.datasets[0].data.filter(v => v !== null);
+        const v = vals[vals.length - 1];
+        const prev = vals[vals.length - 2];
+        const lbl = chart.labels[chart.datasets[0].data.lastIndexOf(v)];
+        kpiDefs.push({ label: `IPC ${lbl}`, value: v + '%', meta: prev ? `ant. ${prev}%` : '', cls: '' });
+      }
+      if (chart.id === 'pbi') {
+        const actuals = chart.datasets[0].data;
+        const idx = actuals.map((v,i) => v !== null ? i : -1).filter(i => i >= 0);
+        if (idx.length) {
+          const i = idx[idx.length-1];
+          const v = actuals[i];
+          kpiDefs.push({ label: `PBI ${chart.labels[i]}`, value: (v > 0 ? '+' : '') + v + '%', meta: 'crecimiento real', cls: v >= 0 ? 'positive' : 'negative' });
+        }
+      }
+      if (chart.id === 'fx_rate') {
+        const actuals = chart.datasets[0].data;
+        const idx = actuals.map((v,i) => v !== null ? i : -1).filter(i => i >= 0);
+        if (idx.length) {
+          const i = idx[idx.length-1];
+          const v = actuals[i];
+          kpiDefs.push({ label: `ARS/USD ${chart.labels[i]}`, value: '$' + v.toLocaleString('es-AR', {maximumFractionDigits: 0}), meta: 'tipo de cambio', cls: '' });
+        }
+      }
+      if (chart.id === 'devaluacion') {
+        const vals = chart.datasets[0].data.filter(v => v !== null);
+        const v = vals[vals.length - 1];
+        const lbl = chart.labels[chart.datasets[0].data.lastIndexOf(v)];
+        kpiDefs.push({ label: `Devaluación ${lbl}`, value: v + '%', meta: v < 0 ? 'apreciación' : 'depreciación', cls: v < 0 ? 'positive' : '' });
+      }
+    });
+  });
+
+  const bar = document.getElementById('kpi-bar');
+  bar.innerHTML = kpiDefs.map(k => `
+    <div class="kpi">
+      <span class="kpi-label">${k.label}</span>
+      <span class="kpi-value ${k.cls}">${k.value}</span>
+      <span class="kpi-meta">${k.meta}</span>
+    </div>`).join('');
+})();
+</script>
+</body>
+</html>
