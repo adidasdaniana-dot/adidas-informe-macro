@@ -490,7 +490,7 @@
     </div>
 
     <!-- Bar chart variation -->
-    <div class="chart-card chart-card-tall">
+    <div class="chart-card">
       <div class="chart-card-top">
         <div>
           <div class="chart-card-title">Variación de Participación 2022 vs. 2021 (pp)</div>
@@ -1161,8 +1161,7 @@ function initMapLabels() {
       t.textContent = content;
       return t;
     }
-    g.appendChild(mkText(-3.5, abbr, true));
-    g.appendChild(mkText(3.5, pct + '%', false));
+    g.appendChild(mkText(0, pct + '%', true));
     svg.appendChild(g);
   });
 }
