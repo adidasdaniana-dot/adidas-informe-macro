@@ -444,7 +444,7 @@
 
     <div class="chart-card">
       <div class="chart-card-top">
-        <div><div class="chart-card-title">PBI por Sector de Actividad — Q4 2025 vs. LY</div><div class="chart-source">Fuente: INDEC — Dirección de Cuentas Nacionales</div></div>
+        <div><div class="chart-card-title">PBI por Sector de Actividad — Q4 2025 vs. LY</div><div class="chart-source">Fuente: CEPAL</div></div>
       </div>
       <div class="time-range" id="range_pbi_sectorial"></div>
       <div class="chart-container" style="height:440px"><canvas id="canvas_pbi_sectorial"></canvas></div>
@@ -462,7 +462,7 @@
       <div class="chart-card-top">
         <div>
           <div class="chart-card-title">Participación en el PBI — 2022</div>
-          <div class="chart-source">Fuente: INDEC — Dirección de Cuentas Nacionales</div>
+          <div class="chart-source">Fuente: CEPAL</div>
         </div>
       </div>
       <div style="position:relative; height:420px; display:flex; justify-content:center;">
@@ -494,7 +494,7 @@
       <div class="chart-card-top">
         <div>
           <div class="chart-card-title">Variación de Participación 2022 vs. 2021 (pp)</div>
-          <div class="chart-source">Fuente: INDEC — Dirección de Cuentas Nacionales</div>
+          <div class="chart-source">Fuente: CEPAL</div>
         </div>
       </div>
       <div class="chart-container" style="height:420px"><canvas id="canvas_pbg_var"></canvas></div>
@@ -618,7 +618,7 @@ var CHARTS = {
     ]
   },
   pbi_sectorial: {
-    title: 'PBI por Sector de Actividad — Q4 2025 vs. LY', source: 'INDEC — Dirección de Cuentas Nacionales',
+    title: 'PBI por Sector de Actividad — Q4 2025 vs. LY', source: 'CEPAL',
     type: 'bar_h_conditional', yLabel: '%', granularity: 'sector',
     labels: ["Intermediación financiera", "Agricultura, ganadería y caza", "Pesca", "Explotación de minas", "Impuestos netos de subsidios", "Electricidad, gas y agua", "Transporte y comunicaciones", "Act. inmobiliarias y empresarial", "Otras actividades servicios", "Construcción", "Enseñanza", "Servicios sociales y de salud", "Hogares privados", "Hoteles y restaurantes", "Adm. pública y defensa", "Comercio mayorista y minorista", "Industria manufacturera"],
     datasets: [
@@ -1089,7 +1089,7 @@ function downloadMap(filename, format) {
     ctx.font='bold 13px Helvetica,Arial,sans-serif'; ctx.fillStyle='#000';
     ctx.fillText('PBG — PARTICIPACIÓN PROVINCIAL EN EL PBI · 2022', 48, HEADER-16);
     ctx.font='10px Helvetica,Arial,sans-serif'; ctx.fillStyle='#767677';
-    ctx.fillText('INDEC — Dirección de Cuentas Nacionales', 48, HEADER-4);
+    ctx.fillText('CEPAL', 48, HEADER-4);
     ctx.drawImage(img, 0, HEADER, W, H);
     ctx.fillStyle='#f5f5f5'; ctx.fillRect(0,HEADER+H,W,FOOTER);
     ctx.fillStyle='#767677'; ctx.font='10px Helvetica,Arial,sans-serif';
@@ -1106,7 +1106,7 @@ function downloadMap(filename, format) {
 // PBG variation chart data
 CHARTS['pbg_var'] = {
   title: 'Variación Participación PBG 2022 vs. 2021',
-  source: 'INDEC — Dirección de Cuentas Nacionales',
+  source: 'CEPAL',
   type: 'bar_h_conditional', yLabel: 'pp', granularity: 'sector',
   labels: ["Buenos Aires", "CABA", "C\u00f3rdoba", "Santa Fe", "Neuqu\u00e9n", "Mendoza", "Entre R\u00edos", "Tucum\u00e1n", "Chubut", "Salta", "Santiago del Estero", "Chaco", "R\u00edo Negro", "Santa Cruz", "Misiones", "San Juan", "Corrientes", "Jujuy", "La Pampa", "San Luis", "Tierra del Fuego", "Formosa", "Catamarca", "La Rioja"],
   datasets: [{label:"Variación (pp)", data:[0.09, 0.01, -0.18, -0.28, 0.42, -0.07, 0.01, -0.1, -0.06, 0.0, 0.03, 0.03, -0.01, -0.02, -0.02, 0.03, -0.04, 0.06, 0.04, -0.01, 0.03, 0.01, 0.04, 0.02], color:"CONDITIONAL_H", dash:false}]
