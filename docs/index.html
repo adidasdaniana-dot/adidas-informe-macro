@@ -646,7 +646,7 @@ function buildDatasets(chart, fromIdx, toIdx) {
   return chart.datasets.map(function(ds) {
     var slicedData = ds.data.slice(fromIdx, toIdx + 1);
     var color = (ds.color === 'CONDITIONAL' || ds.color === 'CONDITIONAL_H')
-      ? slicedData.map(function(v) { return v === null ? 'transparent' : v < 0 ? '#991b1b' : v > 5 ? '#166534' : '#000000'; })
+      ? slicedData.map(function(v) { return v === null ? 'transparent' : v < 0 ? '#166534' : v > 5 ? '#991b1b' : '#000000'; })
       : ds.color;
     var base = {
       label: ds.label, data: slicedData,
