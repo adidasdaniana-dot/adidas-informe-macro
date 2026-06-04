@@ -394,12 +394,6 @@ def build_chart_payload(ipc, devaluation, pbi, fx, disc):
                     "yLabel": "ARS",
                     "insight": insights.get("fx_rate", ""),
                 },
-            ],
-        },
-        {
-            "section": "Sector Calzado e Indumentaria",
-            "subtitle": "Impacto en categorías clave de adidas",
-            "charts": [
                 {
                     "id": "devaluacion",
                     "title": "Devaluación Mensual del Peso",
@@ -417,6 +411,12 @@ def build_chart_payload(ipc, devaluation, pbi, fx, disc):
                     "yLabel": "%",
                     "insight": insights.get("devaluacion", ""),
                 },
+            ],
+        },
+        {
+            "section": "Sector Calzado e Indumentaria",
+            "subtitle": "Impacto en categorías clave de adidas",
+            "charts": [
                 {
                     "id": "discriminada",
                     "title": "Inflación Acumulada Anual — Calzado y APP",
