@@ -645,7 +645,9 @@ function buildDatasets(chart, fromIdx, toIdx) {
   var isMulti = chart.datasets.length > 1;
   return chart.datasets.map(function(ds) {
     var slicedData = ds.data.slice(fromIdx, toIdx + 1);
-    var color = (ds.color === 'CONDITIONAL' || ds.color === 'CONDITIONAL_H')
+    var color = (ds.color === 'CONDITIONAL_H_INV')
+      ? slicedData.map(function(v) { return v === null ? 'transparent' : v < 0 ? '#991b1b' : v > 0 ? '#166534' : '#000000'; })
+      : (ds.color === 'CONDITIONAL' || ds.color === 'CONDITIONAL_H')
       ? slicedData.map(function(v) { return v === null ? 'transparent' : v < 0 ? '#166534' : v > 5 ? '#991b1b' : '#000000'; })
       : ds.color;
     var base = {
@@ -888,8 +890,12 @@ Object.keys(CHARTS).forEach(function(id) {
 
 function getCondColors(chartId, dsIdx, data) {
   var ov = conditionalOverrides[chartId + '_' + dsIdx] || conditionalDefaults;
+  var ds = CHARTS[chartId] && CHARTS[chartId].datasets[dsIdx];
+  var inv = ds && ds.color === 'CONDITIONAL_H_INV';
   return data.map(function(v) {
-    return v === null ? 'transparent' : v < 0 ? ov.neg : v > 5 ? ov.high : ov.mid;
+    if (v === null) return 'transparent';
+    if (inv) return v < 0 ? ov.high : v > 0 ? ov.neg : ov.mid;
+    return v < 0 ? ov.neg : v > 5 ? ov.high : ov.mid;
   });
 }
 
@@ -1113,7 +1119,7 @@ CHARTS['pbg_var'] = {
   source: 'CEPAL',
   type: 'bar_h_conditional', yLabel: 'pp', granularity: 'sector',
   labels: ["Buenos Aires", "CABA", "C\u00f3rdoba", "Santa Fe", "Neuqu\u00e9n", "Mendoza", "Entre R\u00edos", "Tucum\u00e1n", "Chubut", "Salta", "Santiago del Estero", "Chaco", "R\u00edo Negro", "Santa Cruz", "Misiones", "San Juan", "Corrientes", "Jujuy", "La Pampa", "San Luis", "Tierra del Fuego", "Formosa", "Catamarca", "La Rioja"],
-  datasets: [{label:"Variación (pp)", data:[0.09, 0.01, -0.18, -0.28, 0.42, -0.07, 0.01, -0.1, -0.06, 0.0, 0.03, 0.03, -0.01, -0.02, -0.02, 0.03, -0.04, 0.06, 0.04, -0.01, 0.03, 0.01, 0.04, 0.02], color:"CONDITIONAL_H", dash:false}]
+  datasets: [{label:"Variación (pp)", data:[0.09, 0.01, -0.18, -0.28, 0.42, -0.07, 0.01, -0.1, -0.06, 0.0, 0.03, 0.03, -0.01, -0.02, -0.02, 0.03, -0.04, 0.06, 0.04, -0.01, 0.03, 0.01, 0.04, 0.02], color:"CONDITIONAL_H_INV", dash:false}]
 };
 
 // Init pbg_var chart
