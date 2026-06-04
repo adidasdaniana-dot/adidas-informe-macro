@@ -559,7 +559,7 @@ var CHARTS = {
       {label:"Calzado (%)", data:[17.3,13.5,4.9], color:"#000000", dash:false},
       {label:"Indumentaria / APP (%)", data:[22.4,13.4,0.2], color:"#767677", dash:false}
     ]
-  }
+  },
   pbi_sectorial: {
     title: 'PBI por Sector de Actividad — Q4 2025', source: 'INDEC — Dirección de Cuentas Nacionales',
     type: 'bar_h_conditional', yLabel: '%', granularity: 'sector',
@@ -610,6 +610,7 @@ function buildDatasets(chart, fromIdx, toIdx) {
 function buildConfig(chartId, fromIdx, toIdx) {
   var chart = CHARTS[chartId];
   var isBar = chart.type === 'bar' || chart.type === 'bar_conditional' || chart.type === 'bar_h_conditional';
+  var isH = chart.type === 'bar_h_conditional';
   var isMulti = chart.datasets.length > 1;
   var labels = chart.labels.slice(fromIdx, toIdx + 1);
   return {
