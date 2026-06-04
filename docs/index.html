@@ -171,6 +171,32 @@
     .footer-sources { font-size: 10px; color: var(--grey-dark); line-height: 1.9; }
     .footer-copy { font-size: 9px; color: var(--grey-mid); margin-top: 12px; letter-spacing: 0.04em; }
 
+
+    /* ── Page Title ──────────────────────────────────────────────────── */
+    .page-title {
+      background: var(--white);
+      padding: 40px 32px 32px;
+      border-bottom: 1px solid var(--grey-mid);
+    }
+    .main-title {
+      font-family: 'AdidasFont', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      text-transform: uppercase;
+      color: var(--black);
+    }
+    .main-title-sub {
+      display: block;
+      margin-top: 10px;
+      font-size: 11px;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--grey-dark);
+    }
+
     @media (max-width: 780px) {
       header { padding: 14px 16px; }
       .authors-banner { padding: 14px 16px; flex-wrap: wrap; }
@@ -194,6 +220,11 @@
     <strong>4 de junio, 2026 — datos al 30 de abril 2026</strong>
   </div>
 </header>
+
+<div class="page-title">
+  <h1 class="main-title">Informe Macroeconómico</h1>
+  <span class="main-title-sub">Argentina · 2024 — 2026</span>
+</div>
 
 <div class="authors-banner">
   <span class="authors-label">Informe generado por</span>
