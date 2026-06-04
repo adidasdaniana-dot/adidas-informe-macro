@@ -80,8 +80,20 @@
     .authors-divider { width: 1px; height: 40px; background: var(--grey-mid); margin: 0 4px; }
 
     /* KPI Bar */
+    .kpi-section {
+      background: var(--white);
+      border-bottom: 1px solid var(--grey-mid);
+    }
+    .kpi-section-title {
+      padding: 10px 32px 0;
+      font-size: 9px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--grey-dark);
+    }
     .kpi-bar {
-      background: var(--white); border-bottom: 1px solid var(--grey-mid);
+      background: var(--white);
       padding: 14px 32px; display: flex; overflow-x: auto;
     }
     .kpi {
@@ -362,7 +374,10 @@
 </div>
 
 </div>
-<div class="kpi-bar" id="kpi-bar"></div>
+<div class="kpi-section">
+  <div class="kpi-section-title">Indicadores Clave</div>
+  <div class="kpi-bar" id="kpi-bar"></div>
+</div>
 
 <!-- Section 1 -->
 <div class="section">
