@@ -811,22 +811,82 @@ Chart.register({
     Object.keys(chartInstances).forEach(function(id) { if (chartInstances[id] === instance) chartId = id; });
     if (!chartId || !showLabels[chartId]) return;
     var chart = CHARTS[chartId];
-    var isH = chart.type === 'bar_h_conditional';
-    var ctx = instance.ctx;
+    var isH   = chart.type === 'bar_h_conditional';
+    var isBar  = chart.type === 'bar' || chart.type === 'bar_conditional' || isH;
+    var isLine = !isBar;
+    var ctx    = instance.ctx;
     var yLabel = chart.yLabel || '';
+    var nDatasets = instance.data.datasets.length;
+
     instance.data.datasets.forEach(function(ds, dsIdx) {
       var meta = instance.getDatasetMeta(dsIdx);
       if (meta.hidden) return;
+
       meta.data.forEach(function(el, i) {
         var v = ds.data[i];
-        if (v === null || v === undefined) return;
-        var lbl = parseFloat(v.toFixed(1)) + (yLabel === '%' ? '%' : (yLabel ? ' ' + yLabel : ''));
+        if (v === null || v === undefined || v === '') return;
+        var lbl = parseFloat((+v).toFixed(1)) + (yLabel === '%' ? '%' : (yLabel ? ' ' + yLabel : ''));
+
+        // ── Determine bar fill color to choose contrasting text ──
+        var barColor = '#000000';
+        if (Array.isArray(ds.backgroundColor)) {
+          barColor = ds.backgroundColor[i] || '#000000';
+        } else if (typeof ds.backgroundColor === 'string') {
+          barColor = ds.backgroundColor;
+        }
+        // Luminance check for text color contrast
+        var hx = barColor.replace('#','');
+        var lr = parseInt(hx.slice(0,2)||'00',16);
+        var lg = parseInt(hx.slice(2,4)||'00',16);
+        var lb = parseInt(hx.slice(4,6)||'00',16);
+        var lum = (lr*299 + lg*587 + lb*114) / 1000;
+        var textColor = lum > 140 ? '#111' : '#fff';
+
         ctx.save();
-        ctx.font = 'bold 9px Helvetica,Arial,sans-serif';
-        ctx.fillStyle = '#222';
-        ctx.textAlign = isH ? (v >= 0 ? 'left' : 'right') : 'center';
-        ctx.textBaseline = isH ? 'middle' : 'bottom';
-        ctx.fillText(lbl, isH ? el.x + (v >= 0 ? 5 : -5) : el.x, isH ? el.y : el.y - 4);
+
+        if (isH) {
+          // Horizontal bar: try inside, fall back to outside
+          var barW = Math.abs(el.x - el.base);
+          ctx.font = 'bold 9px Helvetica,Arial,sans-serif';
+          var txtW = ctx.measureText(lbl).width + 6;
+          var inside = barW > txtW + 4;
+          if (inside) {
+            ctx.fillStyle = textColor;
+            ctx.textAlign  = v >= 0 ? 'right' : 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(lbl, v >= 0 ? el.x - 4 : el.x + 4, el.y);
+          } else {
+            ctx.fillStyle = '#222';
+            ctx.textAlign  = v >= 0 ? 'left' : 'right';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(lbl, v >= 0 ? el.x + 4 : el.x - 4, el.y);
+          }
+        } else if (isBar) {
+          // Vertical bar: inside top if tall enough, else above
+          var barH = Math.abs(el.y - el.base);
+          ctx.font = 'bold 9px Helvetica,Arial,sans-serif';
+          var inside = barH > 18;
+          if (inside) {
+            ctx.fillStyle = textColor;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.fillText(lbl, el.x, el.y + 4);
+          } else {
+            ctx.fillStyle = '#222';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(lbl, el.x, el.y - 3);
+          }
+        } else {
+          // Line chart: label above point, colored like the line
+          var lineColor = (typeof ds.borderColor === 'string') ? ds.borderColor : '#000';
+          ctx.font = nDatasets > 1 ? '8px Helvetica,Arial,sans-serif' : 'bold 9px Helvetica,Arial,sans-serif';
+          ctx.fillStyle = lineColor === '#ffffff' ? '#000' : lineColor;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(lbl, el.x, el.y - 5);
+        }
+
         ctx.restore();
       });
     });
@@ -1176,10 +1236,17 @@ CHARTS['pbg_var'] = {
   datasets: [{label:"Variación (pp)", data:[0.09, 0.01, -0.18, -0.28, 0.42, -0.07, 0.01, -0.1, -0.06, 0.0, 0.03, 0.03, -0.01, -0.02, -0.02, 0.03, -0.04, 0.06, 0.04, -0.01, 0.03, 0.01, 0.04, 0.02], color:"CONDITIONAL_H_INV", dash:false}]
 };
 
-// Init pbg_var chart
+// Init pbg_var chart (also registers colorOverrides since CHARTS['pbg_var'] was added after the main init loop)
 (function() {
   var id = 'pbg_var';
   if (!CHARTS[id]) return;
+  originalColors[id] = CHARTS[id].datasets.map(function(ds) { return ds.color; });
+  colorOverrides[id]  = CHARTS[id].datasets.map(function(ds) { return null; });
+  CHARTS[id].datasets.forEach(function(ds, i) {
+    if (ds.color === 'CONDITIONAL' || ds.color === 'CONDITIONAL_H_INV') {
+      conditionalOverrides[id + '_' + i] = Object.assign({}, conditionalDefaults);
+    }
+  });
   buildRangeSelector(id);
   var canvas = document.getElementById('canvas_' + id);
   if (!canvas) return;
