@@ -540,7 +540,7 @@
       </div>
       <div class="time-range" id="range_discriminada"></div>
       <div class="chart-container"><canvas id="canvas_discriminada"></canvas></div>
-      <div class="insight-box">Calzado bajó de <strong>17.3%</strong> (sem2 2024) a <strong>13.5%</strong> (2025 completo). Indumentaria (APP) se desaceleró de <strong>22.4%</strong> a <strong>13.4%</strong>. 2026 incluye solo enero–febrero.</div>
+      <div class="insight-box">En 2025, Calzado (<strong>13.5%</strong>) e Indumentaria (<strong>13.4%</strong>) inflaron muy por debajo de la inflación general (<strong>31.5%</strong>), implicando una caída real de precios del sector. En 2024 (jul–dic) Indumentaria (<strong>22.4%</strong>) superó levemente al IPC general (<strong>21.1%</strong>). 2026 incluye solo enero–febrero.</div>
       <div class="download-group">
         <button class="btn-download" onclick="downloadChart('discriminada','Inflacion_Acumulada_Calzado_APP','Inflación Acumulada Anual — Calzado y APP','INDEC','png')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>PNG</button>
         <button class="btn-download" onclick="downloadChart('discriminada','Inflacion_Acumulada_Calzado_APP','Inflación Acumulada Anual — Calzado y APP','INDEC','jpg')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>JPG</button>
@@ -616,7 +616,8 @@ var CHARTS = {
     labels: ["2024 (jul–dic)","2025","2026 (ene–feb)"],
     datasets: [
       {label:"Calzado (%)", data:[17.3,13.5,4.9], color:"#000000", dash:false},
-      {label:"Indumentaria / APP (%)", data:[22.4,13.4,0.2], color:"#767677", dash:false}
+      {label:"Indumentaria / APP (%)", data:[22.4,13.4,0.2], color:"#767677", dash:false},
+      {label:"Inflación General (%)", data:[21.1,31.5,5.9], color:"#c0c0c0", dash:false}
     ]
   },
   pbi_sectorial: {
