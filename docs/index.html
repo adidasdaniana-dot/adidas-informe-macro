@@ -160,6 +160,15 @@
       cursor: pointer; padding: 2px 4px; text-decoration: underline;
     }
     .btn-reset:hover { color: var(--black); }
+    .btn-toggle-labels {
+      display: block; width: 100%; padding: 9px 12px; margin-bottom: 14px;
+      background: var(--black); color: var(--white); border: none;
+      font-size: 11px; font-family: 'AdidasFont', inherit; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-toggle-labels:hover { background: #333; }
+    .btn-toggle-labels.active { background: #166534; }
 
     .chart-container { position: relative; height: 220px; }
     .insight-box {
@@ -793,6 +802,37 @@ function updateChart(chartId, fromIdx, toIdx) {
   instance.update();
 }
 
+// ── Data labels toggle ────────────────────────────────────────────────────
+var showLabels = {};
+Chart.register({
+  id: 'customDataLabels',
+  afterDatasetsDraw: function(instance) {
+    var chartId = null;
+    Object.keys(chartInstances).forEach(function(id) { if (chartInstances[id] === instance) chartId = id; });
+    if (!chartId || !showLabels[chartId]) return;
+    var chart = CHARTS[chartId];
+    var isH = chart.type === 'bar_h_conditional';
+    var ctx = instance.ctx;
+    var yLabel = chart.yLabel || '';
+    instance.data.datasets.forEach(function(ds, dsIdx) {
+      var meta = instance.getDatasetMeta(dsIdx);
+      if (meta.hidden) return;
+      meta.data.forEach(function(el, i) {
+        var v = ds.data[i];
+        if (v === null || v === undefined) return;
+        var lbl = parseFloat(v.toFixed(1)) + (yLabel === '%' ? '%' : (yLabel ? ' ' + yLabel : ''));
+        ctx.save();
+        ctx.font = 'bold 9px Helvetica,Arial,sans-serif';
+        ctx.fillStyle = '#222';
+        ctx.textAlign = isH ? (v >= 0 ? 'left' : 'right') : 'center';
+        ctx.textBaseline = isH ? 'middle' : 'bottom';
+        ctx.fillText(lbl, isH ? el.x + (v >= 0 ? 5 : -5) : el.x, isH ? el.y : el.y - 4);
+        ctx.restore();
+      });
+    });
+  }
+});
+
 // ── Initialize all charts ─────────────────────────────────────────────────
 Object.keys(CHARTS).forEach(function(id) {
   buildRangeSelector(id);
@@ -924,6 +964,19 @@ function openColorPanel(chartId) {
   document.getElementById('colorPanelTitle').textContent = chart.title.toUpperCase();
   var rows = document.getElementById('colorPanelRows');
   rows.innerHTML = '';
+  // Toggle labels button (not shown for map)
+  if (chartId !== '__map__') {
+    var toggleBtn = document.createElement('button');
+    toggleBtn.className = 'btn-toggle-labels' + (showLabels[chartId] ? ' active' : '');
+    toggleBtn.textContent = showLabels[chartId] ? 'Ocultar valores en gráfico' : 'Mostrar valores en gráfico';
+    toggleBtn.addEventListener('click', function() {
+      showLabels[chartId] = !showLabels[chartId];
+      toggleBtn.textContent = showLabels[chartId] ? 'Ocultar valores en gráfico' : 'Mostrar valores en gráfico';
+      toggleBtn.classList.toggle('active', showLabels[chartId]);
+      if (chartInstances[chartId]) chartInstances[chartId].update();
+    });
+    rows.appendChild(toggleBtn);
+  }
   chart.datasets.forEach(function(ds, i) {
     if (ds.color === 'CONDITIONAL') {
       var ov = conditionalOverrides[chartId + '_' + i] || conditionalDefaults;
