@@ -856,26 +856,37 @@ Chart.register({
             ctx.textBaseline = 'middle';
             ctx.fillText(lbl, v >= 0 ? el.x - 4 : el.x + 4, el.y);
           } else {
-            ctx.fillStyle = '#222';
+            ctx.fillStyle = '#333';
             ctx.textAlign  = v >= 0 ? 'left' : 'right';
             ctx.textBaseline = 'middle';
             ctx.fillText(lbl, v >= 0 ? el.x + 4 : el.x - 4, el.y);
           }
         } else if (isBar) {
-          // Vertical bar: inside top if tall enough, else above
+          // Vertical bar: adapt font to density, handle positive/negative separately
+          var nPts = meta.data.length;
+          var fSize = nPts > 18 ? 7 : nPts > 12 ? 8 : 9;
+          ctx.font = 'bold ' + fSize + 'px Helvetica,Arial,sans-serif';
           var barH = Math.abs(el.y - el.base);
-          ctx.font = 'bold 9px Helvetica,Arial,sans-serif';
-          var inside = barH > 18;
+          var isNeg = parseFloat(v) < 0;
+          var inside = barH > (fSize + 8);
           if (inside) {
+            // Place label just inside the value-end of the bar
             ctx.fillStyle = textColor;
             ctx.textAlign = 'center';
-            ctx.textBaseline = 'top';
-            ctx.fillText(lbl, el.x, el.y + 4);
+            if (isNeg) {
+              ctx.textBaseline = 'bottom'; ctx.fillText(lbl, el.x, el.y - 3);
+            } else {
+              ctx.textBaseline = 'top';    ctx.fillText(lbl, el.x, el.y + 3);
+            }
           } else {
+            // Place label just outside the value-end
             ctx.fillStyle = '#222';
             ctx.textAlign = 'center';
-            ctx.textBaseline = 'bottom';
-            ctx.fillText(lbl, el.x, el.y - 3);
+            if (isNeg) {
+              ctx.textBaseline = 'top';    ctx.fillText(lbl, el.x, el.y + 2);
+            } else {
+              ctx.textBaseline = 'bottom'; ctx.fillText(lbl, el.x, el.y - 2);
+            }
           }
         } else {
           // Line chart: label above point, colored like the line
