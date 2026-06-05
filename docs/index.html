@@ -112,6 +112,17 @@
 
     /* Sections */
     .section { padding: 28px 32px 0; }
+    /* ── Analysis section ── */
+    .analysis-section { padding: 28px 32px 36px; }
+    .analysis-header { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.16em; border-bottom: 2px solid var(--black); padding-bottom: 10px; margin-bottom: 22px; }
+    .analysis-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+    .analysis-block { background: var(--grey-light); padding: 18px 20px 16px; }
+    .analysis-subtitle { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.14em; color: var(--grey-dark); margin-bottom: 12px; padding-bottom: 7px; border-bottom: 1px solid var(--grey-mid); }
+    .analysis-list { list-style: none; padding: 0; margin: 0; }
+    .analysis-list li { font-size: 11px; line-height: 1.65; color: #222; padding: 6px 0 6px 14px; border-bottom: 1px solid var(--grey-mid); position: relative; }
+    .analysis-list li:last-child { border-bottom: none; }
+    .analysis-list li::before { content: ""; position: absolute; left: 0; top: 12px; width: 5px; height: 5px; background: var(--black); }
+    @media(max-width:768px){ .analysis-grid { grid-template-columns: 1fr; } }
     .section-header {
       display: flex; align-items: baseline; gap: 16px;
       margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--black);
@@ -560,6 +571,13 @@
 </div>
 
 
+
+<section class="analysis-section">
+  <div class="analysis-header">Análisis Final</div>
+  <div class="analysis-grid" id="analysis-content">
+    <!-- generado dinámicamente por renderAnalysis() -->
+  </div>
+</section>
 
 <footer class="gif-bg-wrap">
   <div class="footer-label">Fuentes de datos</div>
@@ -1352,6 +1370,103 @@ recolorMap = function() {
 
 // Init labels after charts are ready
 setTimeout(initMapLabels, 300);
+
+// ── Análisis Final (generado desde datos) ────────────────────────────────
+function renderAnalysis() {
+  var container = document.getElementById('analysis-content');
+  if (!container) return;
+
+  // ── IPC ──────────────────────────────────────────────────────────────────
+  var ipcDs     = CHARTS.ipc_nacional.datasets[0].data;
+  var ipcLabels = CHARTS.ipc_nacional.labels;
+  var lastIpc   = ipcDs[ipcDs.length - 1];
+  var lastIpcLbl = ipcLabels[ipcLabels.length - 1];
+  var ipc2025   = ipcDs.slice(6, 18).reduce(function(a, v) { return a * (1 + v / 100); }, 1);
+  ipc2025 = Math.round((ipc2025 - 1) * 1000) / 10;
+  var recentAvg = (ipcDs[ipcDs.length-1] + ipcDs[ipcDs.length-2] + ipcDs[ipcDs.length-3]) / 3;
+  var prevAvg   = (ipcDs[ipcDs.length-4] + ipcDs[ipcDs.length-5] + ipcDs[ipcDs.length-6]) / 3;
+  var ipcTrendUp = recentAvg > prevAvg;
+
+  // ── PBI ──────────────────────────────────────────────────────────────────
+  var pbiReal  = CHARTS.pbi.datasets[0].data;
+  var pbiProj  = CHARTS.pbi.datasets[1].data;
+  var pbiYears = CHARTS.pbi.labels;
+  var lastRealIdx = pbiReal.reduce(function(a, v, i) { return v !== null ? i : a; }, 0);
+  var lastRealVal = pbiReal[lastRealIdx];
+  var lastRealYear = pbiYears[lastRealIdx];
+  var firstProjIdx = pbiProj.findIndex(function(v) { return v !== null; });
+  var firstProjVal = pbiProj[firstProjIdx];
+  var firstProjYear = pbiYears[firstProjIdx];
+
+  // ── FX ───────────────────────────────────────────────────────────────────
+  var fxReal   = CHARTS.fx_rate.datasets[0].data;
+  var fxProj   = CHARTS.fx_rate.datasets[1].data;
+  var fxLabels = CHARTS.fx_rate.labels;
+  var lastFxIdx  = fxReal.reduce(function(a, v, i) { return v !== null ? i : a; }, 0);
+  var lastFxVal  = fxReal[lastFxIdx];
+  var lastFxLbl  = fxLabels[lastFxIdx];
+  var lastProjIdx = fxProj.reduce(function(a, v, i) { return v !== null ? i : a; }, 0);
+  var lastProjVal = fxProj[lastProjIdx];
+  var lastProjLbl = fxLabels[lastProjIdx];
+
+  // ── Devaluación ───────────────────────────────────────────────────────────
+  var devDs     = CHARTS.devaluacion.datasets[0].data;
+  var devLabels = CHARTS.devaluacion.labels;
+  var lastDev   = devDs[devDs.length - 1];
+  var lastDevLbl = devLabels[devLabels.length - 1];
+  var appMonths  = devDs.filter(function(v) { return v < 0; }).length;
+
+  // ── Calzado vs IPC general ───────────────────────────────────────────────
+  var calzado2025 = CHARTS.discriminada.datasets[0].data[1];
+  var app2025     = CHARTS.discriminada.datasets[1].data[1];
+  var ipcGen2025  = CHARTS.discriminada.datasets[2].data[1];
+  var diffCalzado = Math.round((ipcGen2025 - calzado2025) * 10) / 10;
+
+  // ── PBI Sectorial ─────────────────────────────────────────────────────────
+  var sectD = CHARTS.pbi_sectorial.datasets[0].data;
+  var sectL = CHARTS.pbi_sectorial.labels;
+  var sectPairs = sectL.map(function(l, i) { return { l: l, v: sectD[i] }; });
+  sectPairs.sort(function(a, b) { return b.v - a.v; });
+  var top1 = sectPairs[0], top2 = sectPairs[1];
+  var bot1 = sectPairs[sectPairs.length - 1];
+  var comercio = sectPairs.find(function(s) { return s.l.indexOf('Comercio') >= 0; }) || sectPairs[sectPairs.length - 2];
+
+  // ── Render ────────────────────────────────────────────────────────────────
+  function li(txt) { return '<li>' + txt + '</li>'; }
+  function ul(items) { return '<ul class="analysis-list">' + items.join('') + '</ul>'; }
+  function sign(v) { return v > 0 ? '+' : ''; }
+
+  var macro = ul([
+    li('<strong>Inflación mensual:</strong> El IPC de ' + lastIpcLbl + ' registró <strong>' + lastIpc + '%</strong>. La tendencia reciente es ' + (ipcTrendUp ? '<strong>al alza</strong>, lo que exige atención sobre el impacto en costos operativos' : '<strong>a la baja</strong>, señal positiva para la estabilidad de costos') + '. La inflación acumulada de 2025 cerró en <strong>' + ipc2025 + '%</strong>.'),
+    li('<strong>Crecimiento económico:</strong> Argentina creció <strong>' + sign(lastRealVal) + lastRealVal + '%</strong> en ' + lastRealYear + '. El REM-BCRA proyecta <strong>+' + firstProjVal + '%</strong> para ' + firstProjYear + ', consolidando una trayectoria de recuperación luego de años de contracción.'),
+    li('<strong>Tipo de cambio:</strong> El ARS/USD se ubica en <strong>$' + Math.round(lastFxVal) + '</strong> (' + lastFxLbl + '). La proyección para ' + lastProjLbl + ' es <strong>$' + Math.round(lastProjVal) + '</strong>, implicando una depreciación nominal gradual y administrada.'),
+    li('<strong>Dinámica cambiaria:</strong> ' + (lastDev < 0 ? 'El peso registra <strong>apreciación real</strong>' : 'El peso registra <strong>depreciación</strong>') + ' en ' + lastDevLbl + ' (' + sign(lastDev) + lastDev + '%'  + ')' + (appMonths > 0 ? ', acumulando <strong>' + appMonths + ' meses de apreciación</strong> desde el abandono del crawling peg. Esto favorece la competitividad de productos importados.' : '.') ),
+    li('<strong>Sector calzado e indumentaria:</strong> En 2025, calzado (' + calzado2025 + '%) e indumentaria (' + app2025 + '%) inflaron <strong>' + diffCalzado + ' pp por debajo del IPC general</strong> (' + ipcGen2025 + '%), implicando caída de precios reales del sector.'),
+    li('<strong>Actividad sectorial (Q4 2025):</strong> Los sectores de mayor tracción son <strong>' + top1.l + ' (+' + top1.v + '%)</strong> y <strong>' + top2.l + ' (+' + top2.v + '%)</strong>. ' + comercio.l + ' (' + sign(comercio.v) + comercio.v + '%) y <strong>' + bot1.l + ' (' + sign(bot1.v) + bot1.v + '%)</strong> muestran las mayores contracciones.')
+  ]);
+
+  var impacto = ul([
+    li('<strong>Poder adquisitivo en recuperación:</strong> El crecimiento del PBI de ' + sign(lastRealVal) + lastRealVal + '% en ' + lastRealYear + ', combinado con inflación de calzado por debajo del promedio, mejora el acceso relativo del consumidor a productos de marca. Contexto favorable para volumen de ventas.'),
+    li('<strong>Oportunidad de pricing:</strong> La caída de precios reales del sector abre margen para ajustar precios sin deteriorar competitividad, o bien para recuperar rentabilidad en el portafolio premium.'),
+    li('<strong>Importaciones más competitivas:</strong> La apreciación del peso reduce el costo de productos importados en términos relativos, mejorando márgenes en las categorías con mayor componente importado del portafolio Adidas Argentina.'),
+    li('<strong>Entorno minorista desafiante:</strong> La contracción del comercio mayorista y minorista (' + sign(comercio.v) + comercio.v + '% interanual en Q4 2025) exige foco en eficiencia de canal, propuesta de valor diferencial y activaciones de sell-out.')
+  ]);
+
+  var futuro = ul([
+    li('<strong>Crecimiento proyectado sostenido:</strong> El consenso del REM-BCRA anticipa expansión del PBI por encima del 3% anual en 2026-2028, lo que impulsa consumo privado y demanda de productos deportivos y premium.'),
+    li('<strong>Inflación en proceso de convergencia:</strong> ' + (ipcTrendUp ? 'El repunte reciente del IPC introduce riesgo sobre el poder adquisitivo y exige revisión de la estrategia de precios para 2026.' : 'La desaceleración inflacionaria es una señal positiva, aunque la convergencia a niveles de un dígito anual sigue siendo el desafío central de la política económica.') ),
+    li('<strong>Estabilidad cambiaria administrada:</strong> La trayectoria proyectada hacia $' + Math.round(lastProjVal) + ' para ' + lastProjLbl + ' es consistente con menor volatilidad, facilitando la planificación de importaciones y el presupuesto en dólares para el ejercicio 2026.'),
+    li('<strong>Riesgo electoral 2027:</strong> El ciclo electoral introduce incertidumbre sobre la continuidad del programa económico. Un cambio en la política fiscal o cambiaria podría presionar costos de importación, tipo de cambio real y consumo. Se recomienda incorporar un escenario de estrés en la planificación estratégica: continuidad del programa actual frente a un posible giro de política económica.'),
+    li('<strong>Posicionamiento competitivo:</strong> La combinación de recuperación de ingresos reales y precios relativos favorables en el sector posiciona a Adidas para capturar participación en un mercado que retoma dinamismo. La ventana de oportunidad es relevante antes del impacto electoral de 2027.')
+  ]);
+
+  container.innerHTML =
+    '<div class="analysis-block"><div class="analysis-subtitle">Panorama macroeconómico</div>' + macro + '</div>' +
+    '<div class="analysis-block"><div class="analysis-subtitle">Impacto en Adidas Argentina</div>' + impacto + '</div>' +
+    '<div class="analysis-block"><div class="analysis-subtitle">Visión 2026-2028 y riesgo electoral</div>' + futuro + '</div>';
+}
+
+renderAnalysis();
 
 </script>
 
