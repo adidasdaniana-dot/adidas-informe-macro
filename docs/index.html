@@ -417,7 +417,7 @@
         <div><div class="chart-card-title">Crecimiento del PBI Argentina</div><div class="chart-source">Fuente: Banco Mundial / REM-BCRA</div></div>
       </div>
       <div class="time-range" id="range_pbi"></div>
-      <div class="chart-container"><canvas id="canvas_pbi"></canvas></div>
+      <div class="chart-container" style="height:300px"><canvas id="canvas_pbi"></canvas></div>
       <div class="insight-box">Tras la caída de <strong>−9.9%</strong> en 2020 y <strong>−1.9%</strong> en 2023, Argentina cerró 2025 con <strong>+4.4%</strong>. El REM-BCRA proyecta <strong>+3.4%</strong> para 2026 y expansión sostenida hasta 2028.</div>
       <div class="download-group">
         <button class="btn-download" onclick="downloadChart('pbi','PBI_Crecimiento_Argentina','Crecimiento del PBI Argentina','Banco Mundial / REM-BCRA','png')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>PNG</button>
@@ -862,31 +862,17 @@ Chart.register({
             ctx.fillText(lbl, v >= 0 ? el.x + 4 : el.x - 4, el.y);
           }
         } else if (isBar) {
-          // Vertical bar: adapt font to density, handle positive/negative separately
+          // Vertical bar: always outside, always black
           var nPts = meta.data.length;
           var fSize = nPts > 18 ? 7 : nPts > 12 ? 8 : 9;
           ctx.font = 'bold ' + fSize + 'px Helvetica,Arial,sans-serif';
-          var barH = Math.abs(el.y - el.base);
           var isNeg = parseFloat(v) < 0;
-          var inside = barH > (fSize + 8);
-          if (inside) {
-            // Place label just inside the value-end of the bar
-            ctx.fillStyle = textColor;
-            ctx.textAlign = 'center';
-            if (isNeg) {
-              ctx.textBaseline = 'bottom'; ctx.fillText(lbl, el.x, el.y - 3);
-            } else {
-              ctx.textBaseline = 'top';    ctx.fillText(lbl, el.x, el.y + 3);
-            }
+          ctx.fillStyle = '#111';
+          ctx.textAlign = 'center';
+          if (isNeg) {
+            ctx.textBaseline = 'top';    ctx.fillText(lbl, el.x, el.y + 2);
           } else {
-            // Place label just outside the value-end
-            ctx.fillStyle = '#222';
-            ctx.textAlign = 'center';
-            if (isNeg) {
-              ctx.textBaseline = 'top';    ctx.fillText(lbl, el.x, el.y + 2);
-            } else {
-              ctx.textBaseline = 'bottom'; ctx.fillText(lbl, el.x, el.y - 2);
-            }
+            ctx.textBaseline = 'bottom'; ctx.fillText(lbl, el.x, el.y - 2);
           }
         } else {
           // Line chart: label above point, colored like the line
