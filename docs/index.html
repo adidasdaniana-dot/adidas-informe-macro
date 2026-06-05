@@ -717,7 +717,7 @@ function buildConfig(chartId, fromIdx, toIdx) {
         },
         y: {
           grid: { color: '#f0f0f0' },
-          grace: (!isH && isBar) ? '20%' : undefined,
+          grace: isH ? undefined : '20%',
           ticks: isH
             ? { font: { size: 9 } }
             : { font: { size: 10 }, callback: function(v) { return v + (chart.yLabel === '%' ? '%' : ''); } }
@@ -876,17 +876,19 @@ Chart.register({
             ctx.textBaseline = 'bottom'; ctx.fillText(lbl, el.x, el.y - 2);
           }
         } else {
-          // Line chart: only label first, last, min and max points per dataset
-          var validData = ds.data.filter(function(x) { return x !== null && x !== undefined; });
-          var minVal = Math.min.apply(null, validData);
-          var maxVal = Math.max.apply(null, validData);
-          var isFirst = i === ds.data.findIndex(function(x) { return x !== null && x !== undefined; });
-          var isLast  = i === (ds.data.length - 1 - ds.data.slice().reverse().findIndex(function(x) { return x !== null && x !== undefined; }));
-          var isMin   = parseFloat(v) === minVal;
-          var isMax   = parseFloat(v) === maxVal;
-          if (!isFirst && !isLast && !isMin && !isMax) { ctx.restore(); return; }
+          // Line chart: fx_rate only shows first/last/min/max; others show all values
+          if (chartId === 'fx_rate') {
+            var validData = ds.data.filter(function(x) { return x !== null && x !== undefined; });
+            var minVal = Math.min.apply(null, validData);
+            var maxVal = Math.max.apply(null, validData);
+            var isFirst = i === ds.data.findIndex(function(x) { return x !== null && x !== undefined; });
+            var isLast  = i === (ds.data.length - 1 - ds.data.slice().reverse().findIndex(function(x) { return x !== null && x !== undefined; }));
+            var isMin   = parseFloat(v) === minVal;
+            var isMax   = parseFloat(v) === maxVal;
+            if (!isFirst && !isLast && !isMin && !isMax) { ctx.restore(); return; }
+          }
           var lineColor = (typeof ds.borderColor === 'string') ? ds.borderColor : '#000';
-          ctx.font = 'bold 9px Helvetica,Arial,sans-serif';
+          ctx.font = nDatasets > 1 ? '8px Helvetica,Arial,sans-serif' : 'bold 9px Helvetica,Arial,sans-serif';
           ctx.fillStyle = lineColor === '#ffffff' ? '#000' : lineColor;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'bottom';
