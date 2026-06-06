@@ -54,7 +54,20 @@
       font-size: 9px; font-weight: 400; letter-spacing: 0.18em;
       text-transform: uppercase; opacity: 0.6;
     }
-    .header-right { text-align: right; font-size: 10px; opacity: 0.5; letter-spacing: 0.04em; }
+    .header-right {
+      text-align: right;
+      display: flex; flex-direction: column; align-items: flex-end; gap: 3px;
+    }
+    .header-updated-label {
+      font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em;
+      opacity: 0.45; color: var(--white);
+    }
+    .header-updated-date {
+      font-size: 11px; font-weight: 900; letter-spacing: 0.02em; color: var(--white);
+    }
+    .header-updated-data {
+      font-size: 9px; font-weight: 400; letter-spacing: 0.04em; opacity: 0.6; color: var(--white);
+    }
 
     /* Authors Banner */
     .authors-banner {
@@ -136,6 +149,10 @@
     }
     .section-title { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.16em; }
     .section-subtitle { font-size: 10px; color: var(--grey-dark); letter-spacing: 0.04em; }
+    .section-number {
+      font-size: 28px; font-weight: 900; line-height: 1; letter-spacing: -0.04em;
+      color: var(--grey-mid); margin-right: 4px; flex-shrink: 0; align-self: center;
+    }
     /* ── Sticky nav ── */
     .sticky-nav {
       position: sticky; top: 0; z-index: 200;
@@ -395,8 +412,9 @@
     </div>
   </div>
   <div class="header-right">
-    Última actualización<br>
-    <strong>4 de junio, 2026 — datos al 30 de abril 2026</strong>
+    <span class="header-updated-label">Última actualización</span>
+    <span class="header-updated-date">4 de junio, 2026</span>
+    <span class="header-updated-data">Datos al 30 de abril 2026</span>
   </div>
 </header>
 
@@ -446,6 +464,7 @@
 <!-- Section 1 -->
 <div class="section" id="sec-macro">
   <div class="section-header">
+    <span class="section-number">01</span>
     <span class="section-title">Contexto Macroeconómico</span>
     <span class="section-subtitle">Argentina · INDEC / Banco Mundial / REM-BCRA</span>
   </div>
@@ -605,6 +624,7 @@
 <!-- Section 2 -->
 <div class="section" id="sec-adidas">
   <div class="section-header">
+    <span class="section-number">02</span>
     <span class="section-title">Sector Calzado e Indumentaria</span>
   </div>
   <div class="charts-grid">
@@ -641,7 +661,7 @@
 
 
 <section class="analysis-section" id="sec-analisis">
-  <div class="analysis-header">Análisis Final</div>
+  <div class="analysis-header"><span class="section-number" style="color:#ddd;margin-right:10px">03</span>Análisis Final</div>
   <div class="analysis-grid" id="analysis-content">
     <!-- generado dinámicamente por renderAnalysis() -->
   </div>
