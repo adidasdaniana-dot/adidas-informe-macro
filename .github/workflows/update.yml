@@ -1,6 +1,8 @@
 name: Daily Report Update
 
 on:
+  push:
+    branches: [main, "claude/**"]
   schedule:
     - cron: '0 8 * * *'
   workflow_dispatch:
