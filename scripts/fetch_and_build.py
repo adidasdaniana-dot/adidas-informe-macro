@@ -477,6 +477,11 @@ def render_html(sections: list) -> str:
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
+    creds_json = os.environ.get("GOOGLE_SHEETS_CREDENTIALS", "").strip()
+    file_id = os.environ.get("SHEET_FILE_ID", "").strip()
+    if not creds_json or not file_id:
+        print("Secrets GOOGLE_SHEETS_CREDENTIALS / SHEET_FILE_ID not configured. Skipping update.")
+        sys.exit(0)
     print("Downloading Excel from Google Drive...")
     file_bytes = download_excel()
 
