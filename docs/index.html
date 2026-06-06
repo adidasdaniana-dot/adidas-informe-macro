@@ -1311,10 +1311,7 @@ var MAP_ABBREVS = {"Buenos Aires": "BsAs", "Ciudad de Buenos Aires": "CABA", "C\
 function initMapLabels() {
   var svg = document.querySelector('#map-card svg');
   if (!svg) return;
-  // Bail out if paths are not laid out yet (getBBox returns zero)
-  var firstPath = svg.querySelector('.prov-path');
-  if (!firstPath) return;
-  try { var testBb = firstPath.getBBox(); if (!testBb || testBb.width === 0) { setTimeout(initMapLabels, 500); return; } } catch(e) { setTimeout(initMapLabels, 500); return; }
+  if (!svg.querySelector('.prov-path')) return;
   // Manual centroid overrides (dx/dy relative to bb center) for irregular shapes
   var LABEL_OFFSET = {
     'Salta':            { dx:  20, dy:  20 },
@@ -1395,11 +1392,14 @@ recolorMap = function() {
 
 // Also update downloadMap to include labels (they're in the SVG so they export automatically)
 
-// Init labels after charts are ready — multiple passes to survive layout shifts
-setTimeout(initMapLabels, 400);
-setTimeout(initMapLabels, 1000);
-setTimeout(initMapLabels, 2000);
-window.addEventListener('load', function() { setTimeout(initMapLabels, 300); });
+// Init labels — double rAF ensures layout is complete, setTimeout as fallback
+function _scheduleMapLabels() {
+  requestAnimationFrame(function() { requestAnimationFrame(initMapLabels); });
+}
+_scheduleMapLabels();
+setTimeout(initMapLabels, 600);
+setTimeout(initMapLabels, 1500);
+window.addEventListener('load', _scheduleMapLabels);
 
 // ── Análisis Final (generado desde datos) ────────────────────────────────
 function renderAnalysis() {
