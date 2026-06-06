@@ -96,17 +96,24 @@
     }
     .kpi-bar {
       background: var(--white);
-      padding: 14px 32px; display: flex; overflow-x: auto;
+      padding: 16px 32px; display: flex; overflow-x: auto; gap: 0;
     }
     .kpi {
-      display: flex; flex-direction: column; gap: 2px;
-      padding: 4px 24px 4px 0; margin-right: 24px;
-      border-right: 1px solid var(--grey-mid); min-width: 110px;
+      display: flex; flex-direction: column; gap: 3px;
+      padding: 10px 28px 10px 0; margin-right: 28px;
+      border-right: 1px solid var(--grey-mid); min-width: 130px;
+      transition: transform 0.15s ease;
     }
+    .kpi:hover { transform: translateY(-2px); }
     .kpi:last-child { border-right: none; }
     .kpi-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--grey-dark); }
-    .kpi-value { font-size: 22px; font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; }
-    .kpi-meta { font-size: 10px; color: var(--grey-dark); margin-top: 1px; }
+    .kpi-value-row { display: flex; align-items: baseline; gap: 7px; }
+    .kpi-value { font-size: 30px; font-weight: 900; line-height: 1; letter-spacing: -0.03em; }
+    .kpi-trend { font-size: 18px; font-weight: 900; line-height: 1; }
+    .kpi-trend.up   { color: var(--green); }
+    .kpi-trend.down { color: var(--red); }
+    .kpi-trend.flat { color: var(--grey-dark); font-size: 14px; }
+    .kpi-meta { font-size: 10px; color: var(--grey-dark); margin-top: 2px; }
     .positive { color: var(--green); }
     .negative { color: var(--red); }
 
@@ -993,17 +1000,21 @@ function downloadChart(chartId, filename, chartTitle, sourceText, format) {
 // ── KPI bar ───────────────────────────────────────────────────────────────
 (function() {
   var kpis = [
-    { label:'IPC abr-26',         value:'2.6%',   meta:'inflación mensual',    cls:'' },
-    { label:'PBI 2025',           value:'+4.4%',  meta:'crecimiento real',     cls:'positive' },
-    { label:'ARS/USD abr-26',     value:'$1,381', meta:'tipo de cambio',       cls:'' },
-    { label:'Devaluación abr-26', value:'−1.1%',  meta:'apreciación del peso', cls:'positive' },
-    { label:'Calzado 2025',       value:'13.5%',  meta:'inflación acumulada',  cls:'' },
-    { label:'PBI 2026 proy.',     value:'+3.4%',  meta:'REM-BCRA',             cls:'positive' },
+    { label:'IPC abr-26',         value:'2.6%',   meta:'inflación mensual',    cls:'',         trend:'flat', trendTitle:'Bajó de 3.4% en mar-26' },
+    { label:'PBI 2025',           value:'+4.4%',  meta:'crecimiento real',     cls:'positive', trend:'up',   trendTitle:'Mejor año desde 2021' },
+    { label:'ARS/USD abr-26',     value:'$1,381', meta:'tipo de cambio',       cls:'',         trend:'flat', trendTitle:'Apreciación desde nov-25' },
+    { label:'Apreciación abr-26', value:'−1.1%',  meta:'devaluación mensual',  cls:'positive', trend:'up',   trendTitle:'Peso se apreció 1.1% en abr-26' },
+    { label:'Calzado 2025',       value:'13.5%',  meta:'vs IPC general 31.5%', cls:'positive', trend:'up',   trendTitle:'18pp por debajo del IPC general' },
+    { label:'PBI 2026 proy.',     value:'+3.4%',  meta:'proyección REM-BCRA',  cls:'positive', trend:'up',   trendTitle:'Expansión sostenida hasta 2028' },
   ];
   document.getElementById('kpi-bar').innerHTML = kpis.map(function(k) {
-    return '<div class="kpi"><span class="kpi-label">' + k.label + '</span>'
-      + '<span class="kpi-value ' + k.cls + '">' + k.value + '</span>'
-      + '<span class="kpi-meta">' + k.meta + '</span></div>';
+    var arrowMap = { up: '↑', down: '↓', flat: '→' };
+    var arrow = '<span class="kpi-trend ' + k.trend + '" title="' + k.trendTitle + '">' + arrowMap[k.trend] + '</span>';
+    return '<div class="kpi">'
+      + '<span class="kpi-label">' + k.label + '</span>'
+      + '<div class="kpi-value-row"><span class="kpi-value ' + k.cls + '">' + k.value + '</span>' + arrow + '</div>'
+      + '<span class="kpi-meta">' + k.meta + '</span>'
+      + '</div>';
   }).join('');
 })();
 
