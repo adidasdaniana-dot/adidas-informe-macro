@@ -230,6 +230,14 @@
       background: var(--grey-light); border-left: 3px solid var(--black);
       padding: 9px 12px; margin-top: 12px; font-size: 11px; line-height: 1.65; color: #333;
     }
+    .insight-box--positive {
+      background: #f0faf4; border-left-color: #166534; color: #14532d;
+    }
+    .insight-box--positive strong { color: #166534; }
+    .insight-box--critical {
+      background: #fff5f5; border-left-color: #991b1b; color: #7f1d1d;
+    }
+    .insight-box--critical strong { color: #991b1b; }
     .download-group { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
     .btn-download {
       display: inline-flex; align-items: center; gap: 6px; padding: 6px 13px;
@@ -405,6 +413,41 @@
     }
     .chart-card { cursor: pointer; }
     .chart-card:hover { outline: 2px solid var(--black); }
+
+    /* ── Chart entrance animation ── */
+    .chart-card {
+      opacity: 0; transform: translateY(18px);
+      transition: opacity 0.45s ease, transform 0.45s ease;
+    }
+    .chart-card.visible {
+      opacity: 1; transform: translateY(0);
+    }
+
+    /* ── Alternating section backgrounds ── */
+    .kpi-section { background: var(--white); }
+    .section:nth-child(odd) { background: var(--white); }
+    .section:nth-child(even) { background: #f5f5f5; }
+    #sec-adidas { background: #f5f5f5; }
+    .analysis-section { background: var(--white); }
+
+    /* ── Print stylesheet ── */
+    @media print {
+      html { scroll-behavior: auto; }
+      .sticky-nav, .btn-download, .btn-palette, .btn-toggle-labels,
+      .color-panel, .palette-btn { display: none !important; }
+      .report-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .chart-card { opacity: 1 !important; transform: none !important;
+        break-inside: avoid; page-break-inside: avoid; }
+      .section { break-inside: avoid; }
+      .section:nth-child(even) { background: #f7f7f7 !important;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .insight-box--positive { background: #f0faf4 !important;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .insight-box--critical { background: #fff5f5 !important;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      body { font-size: 11pt; }
+      canvas { max-width: 100% !important; }
+    }
   </style>
 </head>
 <body>
@@ -481,7 +524,7 @@
       </div>
       <div class="time-range" id="range_ipc_nacional"></div>
       <div class="chart-container"><canvas id="canvas_ipc_nacional"></canvas></div>
-      <div class="insight-box">Pico: <strong>4.2%</strong> (ago-24). Mínimo: <strong>1.5%</strong> (may-25). Último dato: <strong>2.6%</strong> (abr-26). La inflación mensual mostró tendencia descendente durante 2024 antes de estabilizarse en torno al 2–3% en 2026.</div>
+      <div class="insight-box insight-box--critical">Pico: <strong>4.2%</strong> (ago-24). Mínimo: <strong>1.5%</strong> (may-25). Último dato: <strong>2.6%</strong> (abr-26). La inflación mensual mostró tendencia descendente durante 2024 antes de estabilizarse en torno al 2–3% en 2026.</div>
       <div class="download-group">
         <button class="btn-download" onclick="downloadChart('ipc_nacional','IPC_Inflacion_Mensual_Nacional','IPC — Inflación Mensual Nacional','INDEC','png')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>PNG</button>
         <button class="btn-download" onclick="downloadChart('ipc_nacional','IPC_Inflacion_Mensual_Nacional','IPC — Inflación Mensual Nacional','INDEC','jpg')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>JPG</button>
@@ -494,7 +537,7 @@
       </div>
       <div class="time-range" id="range_pbi"></div>
       <div class="chart-container" style="height:280px"><canvas id="canvas_pbi"></canvas></div>
-      <div class="insight-box">Tras la caída de <strong>−9.9%</strong> en 2020 y <strong>−1.9%</strong> en 2023, Argentina cerró 2025 con <strong>+4.4%</strong>. El REM-BCRA proyecta <strong>+3.4%</strong> para 2026 y expansión sostenida hasta 2028.</div>
+      <div class="insight-box insight-box--positive">Tras la caída de <strong>−9.9%</strong> en 2020 y <strong>−1.9%</strong> en 2023, Argentina cerró 2025 con <strong>+4.4%</strong>. El REM-BCRA proyecta <strong>+3.4%</strong> para 2026 y expansión sostenida hasta 2028.</div>
       <div class="download-group">
         <button class="btn-download" onclick="downloadChart('pbi','PBI_Crecimiento_Argentina','Crecimiento del PBI Argentina','Banco Mundial / REM-BCRA','png')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>PNG</button>
         <button class="btn-download" onclick="downloadChart('pbi','PBI_Crecimiento_Argentina','Crecimiento del PBI Argentina','Banco Mundial / REM-BCRA','jpg')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>JPG</button>
@@ -521,7 +564,7 @@
       </div>
       <div class="time-range" id="range_devaluacion"></div>
       <div class="chart-container"><canvas id="canvas_devaluacion"></canvas></div>
-      <div class="insight-box">Máximo: <strong>7.25%</strong> (jul-25) post-salida del crawling peg. Desde nov-25 registra valores negativos (apreciación). Último: <strong>−1.07%</strong> (abr-26). <span style="color:var(--green);font-weight:700">Verde</span> = apreciación del peso.</div>
+      <div class="insight-box insight-box--positive">Máximo: <strong>7.25%</strong> (jul-25) post-salida del crawling peg. Desde nov-25 registra valores negativos (apreciación). Último: <strong>−1.07%</strong> (abr-26). <span style="color:var(--green);font-weight:700">Verde</span> = apreciación del peso.</div>
       <div class="download-group">
         <button class="btn-download" onclick="downloadChart('devaluacion','Devaluacion_Mensual_Peso','Devaluación Mensual del Peso','BCRA / REM-BCRA','png')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>PNG</button>
         <button class="btn-download" onclick="downloadChart('devaluacion','Devaluacion_Mensual_Peso','Devaluación Mensual del Peso','BCRA / REM-BCRA','jpg')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>JPG</button>
@@ -534,7 +577,7 @@
       </div>
       <div class="time-range" id="range_pbi_sectorial"></div>
       <div class="chart-container" style="height:440px"><canvas id="canvas_pbi_sectorial"></canvas></div>
-      <div class="insight-box">Intermediación financiera (<strong>+17.2%</strong>) y Agricultura (<strong>+16.1%</strong>) lideran el crecimiento. Industria manufacturera (<strong>−5.0%</strong>) y Comercio (<strong>−2.2%</strong>) registran las mayores caídas. El PBI total creció <strong>+2.06%</strong> en Q4 2025. Fuente: INDEC.</div>
+      <div class="insight-box insight-box--critical">Intermediación financiera (<strong>+17.2%</strong>) y Agricultura (<strong>+16.1%</strong>) lideran el crecimiento. Industria manufacturera (<strong>−5.0%</strong>) y Comercio (<strong>−2.2%</strong>) registran las mayores caídas. El PBI total creció <strong>+2.06%</strong> en Q4 2025. Fuente: INDEC.</div>
       <div class="download-group">
         <button class="btn-download" onclick="downloadChart('pbi_sectorial','PBI_Sector_Q4_2025','PBI por Sector — Q4 2025','INDEC — Dir. Cuentas Nacionales','png')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>PNG</button>
         <button class="btn-download" onclick="downloadChart('pbi_sectorial','PBI_Sector_Q4_2025','PBI por Sector — Q4 2025','INDEC — Dir. Cuentas Nacionales','jpg')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>JPG</button>
@@ -653,7 +696,7 @@
       </div>
       <div class="time-range" id="range_discriminada"></div>
       <div class="chart-container"><canvas id="canvas_discriminada"></canvas></div>
-      <div class="insight-box">En 2025, Calzado (<strong>13.5%</strong>) e Indumentaria (<strong>13.4%</strong>) inflaron muy por debajo de la inflación general (<strong>31.5%</strong>), implicando una caída real de precios del sector. En 2024 (jul–dic) Indumentaria (<strong>22.4%</strong>) superó levemente al IPC general (<strong>21.1%</strong>). 2026 incluye solo enero–febrero.</div>
+      <div class="insight-box insight-box--positive">En 2025, Calzado (<strong>13.5%</strong>) e Indumentaria (<strong>13.4%</strong>) inflaron muy por debajo de la inflación general (<strong>31.5%</strong>), implicando una caída real de precios del sector. En 2024 (jul–dic) Indumentaria (<strong>22.4%</strong>) superó levemente al IPC general (<strong>21.1%</strong>). 2026 incluye solo enero–febrero.</div>
       <div class="download-group">
         <button class="btn-download" onclick="downloadChart('discriminada','Inflacion_Acumulada_Calzado_APP','Inflación Acumulada Anual — Calzado y APP','INDEC','png')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>PNG</button>
         <button class="btn-download" onclick="downloadChart('discriminada','Inflacion_Acumulada_Calzado_APP','Inflación Acumulada Anual — Calzado y APP','INDEC','jpg')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>JPG</button>
@@ -1563,6 +1606,25 @@ renderAnalysis();
   }
 })();
 
+</script>
+
+<script>
+// Chart entrance animation via IntersectionObserver
+(function() {
+  if (!('IntersectionObserver' in window)) {
+    document.querySelectorAll('.chart-card').forEach(function(el) { el.classList.add('visible'); });
+    return;
+  }
+  var io = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.chart-card').forEach(function(el) { io.observe(el); });
+})();
 </script>
 
 <div class="color-backdrop" id="colorBackdrop" onclick="closeColorPanel()"></div>
