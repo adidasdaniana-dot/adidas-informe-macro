@@ -167,6 +167,11 @@
     }
     .sticky-nav a:hover, .sticky-nav a.active { color: #fff; background: #222; }
     .sticky-nav a:last-child { border-right: none; }
+    html { scroll-behavior: smooth; }
+    /* Offset anchor targets so sticky nav doesn't cover them */
+    #sec-kpi, #sec-macro, #sec-adidas, #sec-analisis {
+      scroll-margin-top: 44px;
+    }
 
     /* Chart Grid */
     .charts-grid {
