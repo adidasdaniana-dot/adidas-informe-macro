@@ -1311,6 +1311,8 @@ var MAP_ABBREVS = {"Buenos Aires": "BsAs", "Ciudad de Buenos Aires": "CABA", "C\
 function initMapLabels() {
   var svg = document.querySelector('#map-card svg');
   if (!svg) return;
+  // Bail out if SVG is not laid out yet (getBBox would return zeros)
+  try { var testBb = svg.getBBox(); if (testBb.width === 0) { setTimeout(initMapLabels, 400); return; } } catch(e) { return; }
   // Manual centroid overrides (dx/dy relative to bb center) for irregular shapes
   var LABEL_OFFSET = {
     'Salta':            { dx:  20, dy:  20 },
@@ -1391,8 +1393,10 @@ recolorMap = function() {
 
 // Also update downloadMap to include labels (they're in the SVG so they export automatically)
 
-// Init labels after charts are ready
+// Init labels after charts are ready — multiple passes to survive layout shifts
 setTimeout(initMapLabels, 300);
+setTimeout(initMapLabels, 800);
+window.addEventListener('load', function() { setTimeout(initMapLabels, 200); });
 
 // ── Análisis Final (generado desde datos) ────────────────────────────────
 function renderAnalysis() {
