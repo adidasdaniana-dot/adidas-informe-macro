@@ -530,7 +530,7 @@
       </div>
       <div class="time-range" id="range_ipc_nacional"></div>
       <div class="chart-container"><canvas id="canvas_ipc_nacional"></canvas></div>
-      <div class="insight-box insight-box--critical">Pico: <strong>4.2%</strong> (ago-24). Mínimo: <strong>1.5%</strong> (may-25). Último dato: <strong>2.6%</strong> (abr-26). La inflación mensual mostró tendencia descendente durante 2024 antes de estabilizarse en torno al 2–3% en 2026.</div>
+      <div class="insight-box" id="insight_ipc_nacional"></div>
       <div class="download-group">
         <button class="btn-download" onclick="downloadChart('ipc_nacional','IPC_Inflacion_Mensual_Nacional','IPC — Inflación Mensual Nacional','INDEC','png')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>PNG</button>
         <button class="btn-download" onclick="downloadChart('ipc_nacional','IPC_Inflacion_Mensual_Nacional','IPC — Inflación Mensual Nacional','INDEC','jpg')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>JPG</button>
@@ -543,7 +543,7 @@
       </div>
       <div class="time-range" id="range_pbi"></div>
       <div class="chart-container" style="height:280px"><canvas id="canvas_pbi"></canvas></div>
-      <div class="insight-box insight-box--positive">Tras la caída de <strong>−9.9%</strong> en 2020 y <strong>−1.9%</strong> en 2023, Argentina cerró 2025 con <strong>+4.4%</strong>. El REM-BCRA proyecta <strong>+3.4%</strong> para 2026 y expansión sostenida hasta 2028.</div>
+      <div class="insight-box" id="insight_pbi"></div>
       <div class="download-group">
         <button class="btn-download" onclick="downloadChart('pbi','PBI_Crecimiento_Argentina','Crecimiento del PBI Argentina','Banco Mundial / REM-BCRA','png')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>PNG</button>
         <button class="btn-download" onclick="downloadChart('pbi','PBI_Crecimiento_Argentina','Crecimiento del PBI Argentina','Banco Mundial / REM-BCRA','jpg')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>JPG</button>
@@ -556,7 +556,7 @@
       </div>
       <div class="time-range" id="range_fx_rate"></div>
       <div class="chart-container"><canvas id="canvas_fx_rate"></canvas></div>
-      <div class="insight-box">El ARS/USD pasó de <strong>$924</strong> (jul-24) a <strong>$1,381</strong> (abr-26), con apreciación del peso desde noviembre 2025. El REM-BCRA proyecta <strong>$1,572</strong> para sep-26.</div>
+      <div class="insight-box" id="insight_fx_rate"></div>
       <div class="download-group">
         <button class="btn-download" onclick="downloadChart('fx_rate','Tipo_de_Cambio_ARS_USD','Tipo de Cambio ARS/USD','BCRA / REM-BCRA','png')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>PNG</button>
         <button class="btn-download" onclick="downloadChart('fx_rate','Tipo_de_Cambio_ARS_USD','Tipo de Cambio ARS/USD','BCRA / REM-BCRA','jpg')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>JPG</button>
@@ -570,7 +570,7 @@
       </div>
       <div class="time-range" id="range_devaluacion"></div>
       <div class="chart-container"><canvas id="canvas_devaluacion"></canvas></div>
-      <div class="insight-box insight-box--positive">Máximo: <strong>7.25%</strong> (jul-25) post-salida del crawling peg. Desde nov-25 registra valores negativos (apreciación). Último: <strong>−1.07%</strong> (abr-26). <span style="color:var(--green);font-weight:700">Verde</span> = apreciación del peso.</div>
+      <div class="insight-box" id="insight_devaluacion"></div>
       <div class="download-group">
         <button class="btn-download" onclick="downloadChart('devaluacion','Devaluacion_Mensual_Peso','Devaluación Mensual del Peso','BCRA / REM-BCRA','png')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>PNG</button>
         <button class="btn-download" onclick="downloadChart('devaluacion','Devaluacion_Mensual_Peso','Devaluación Mensual del Peso','BCRA / REM-BCRA','jpg')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>JPG</button>
@@ -583,7 +583,7 @@
       </div>
       <div class="time-range" id="range_pbi_sectorial"></div>
       <div class="chart-container" style="height:440px"><canvas id="canvas_pbi_sectorial"></canvas></div>
-      <div class="insight-box insight-box--critical">Intermediación financiera (<strong>+17.2%</strong>) y Agricultura (<strong>+16.1%</strong>) lideran el crecimiento. Industria manufacturera (<strong>−5.0%</strong>) y Comercio (<strong>−2.2%</strong>) registran las mayores caídas. El PBI total creció <strong>+2.06%</strong> en Q4 2025. Fuente: INDEC.</div>
+      <div class="insight-box" id="insight_pbi_sectorial"></div>
       <div class="download-group">
         <button class="btn-download" onclick="downloadChart('pbi_sectorial','PBI_Sector_Q4_2025','PBI por Sector — Q4 2025','INDEC — Dir. Cuentas Nacionales','png')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>PNG</button>
         <button class="btn-download" onclick="downloadChart('pbi_sectorial','PBI_Sector_Q4_2025','PBI por Sector — Q4 2025','INDEC — Dir. Cuentas Nacionales','jpg')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>JPG</button>
@@ -689,7 +689,7 @@
       </div>
       <div class="time-range" id="range_ipc_comparativo"></div>
       <div class="chart-container"><canvas id="canvas_ipc_comparativo"></canvas></div>
-      <div class="insight-box">La inflación en prendas y calzado es más volátil que el índice general. Pico sectorial: <strong>6.0%</strong> (sep-24). Deflación puntual en jul-25 (−0.9%). Convergencia hacia el índice general a partir de 2026.</div>
+      <div class="insight-box" id="insight_ipc_comparativo"></div>
       <div class="download-group">
         <button class="btn-download" onclick="downloadChart('ipc_comparativo','Prendas_Calzado_vs_General','Prendas y Calzado vs. Inflación General','INDEC','png')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>PNG</button>
         <button class="btn-download" onclick="downloadChart('ipc_comparativo','Prendas_Calzado_vs_General','Prendas y Calzado vs. Inflación General','INDEC','jpg')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>JPG</button>
@@ -702,7 +702,7 @@
       </div>
       <div class="time-range" id="range_discriminada"></div>
       <div class="chart-container"><canvas id="canvas_discriminada"></canvas></div>
-      <div class="insight-box insight-box--positive">En 2025, Calzado (<strong>13.5%</strong>) e Indumentaria (<strong>13.4%</strong>) inflaron muy por debajo de la inflación general (<strong>31.5%</strong>), implicando una caída real de precios del sector. En 2024 (jul–dic) Indumentaria (<strong>22.4%</strong>) superó levemente al IPC general (<strong>21.1%</strong>). 2026 incluye solo enero–febrero.</div>
+      <div class="insight-box" id="insight_discriminada"></div>
       <div class="download-group">
         <button class="btn-download" onclick="downloadChart('discriminada','Inflacion_Acumulada_Calzado_APP','Inflación Acumulada Anual — Calzado y APP','INDEC','png')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>PNG</button>
         <button class="btn-download" onclick="downloadChart('discriminada','Inflacion_Acumulada_Calzado_APP','Inflación Acumulada Anual — Calzado y APP','INDEC','jpg')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>JPG</button>
@@ -1578,6 +1578,144 @@ function renderAnalysis() {
     '<div class="analysis-block"><div class="analysis-subtitle">Visión 2026-2028 y riesgo electoral</div>' + futuro + '</div>';
 }
 
+// ── Per-chart dynamic insights ────────────────────────────────────────────────
+function renderInsights() {
+  function setEl(id, html, cls) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = html;
+    el.className = 'insight-box' + (cls ? ' ' + cls : '');
+  }
+  function sign(v) { return v > 0 ? '+' : ''; }
+  function absRound(v) { return Math.round(Math.abs(v) * 10) / 10; }
+
+  // IPC Nacional
+  (function() {
+    var d = CHARTS.ipc_nacional.datasets[0].data;
+    var l = CHARTS.ipc_nacional.labels;
+    var pairs = d.map(function(v,i){return{v:v,l:l[i]};}).filter(function(p){return p.v!==null;});
+    if (!pairs.length) return;
+    var mx   = pairs.reduce(function(a,b){return b.v>a.v?b:a;});
+    var mn   = pairs.reduce(function(a,b){return b.v<a.v?b:a;});
+    var last = pairs[pairs.length-1];
+    var prev = pairs.length>1 ? pairs[pairs.length-2] : last;
+    var trendUp = last.v > prev.v;
+    setEl('insight_ipc_nacional',
+      'Pico: <strong>'+mx.v+'%</strong> ('+mx.l+'). Mínimo: <strong>'+mn.v+'%</strong> ('+mn.l+'). Último dato: <strong>'+last.v+'%</strong> ('+last.l+'). '+
+      (trendUp ? 'La inflación muestra repunte reciente — señal de atención sobre costos.' : 'La inflación se estabiliza en torno al 2–3% mensual.'),
+      'insight-box--critical');
+  })();
+
+  // PBI
+  (function() {
+    var actual = CHARTS.pbi.datasets[0].data;
+    var proj   = CHARTS.pbi.datasets[1].data;
+    var years  = CHARTS.pbi.labels;
+    var actP  = actual.map(function(v,i){return{v:v,y:years[i]};}).filter(function(p){return p.v!==null;});
+    var projP = proj.map(function(v,i){return{v:v,y:years[i]};}).filter(function(p){return p.v!==null;});
+    if (!actP.length) return;
+    var worst  = actP.reduce(function(a,b){return b.v<a.v?b:a;});
+    var last   = actP[actP.length-1];
+    var firstP = projP[0];
+    var lastP  = projP[projP.length-1];
+    setEl('insight_pbi',
+      'Tras la caída de <strong>'+worst.v+'%</strong> en '+worst.y+', Argentina cerró '+last.y+' con <strong>'+sign(last.v)+last.v+'%</strong>. '+
+      (firstP ? 'El REM-BCRA proyecta <strong>+'+firstP.v+'%</strong> para '+firstP.y+(lastP && lastP.y!==firstP.y ? ' y expansión sostenida hasta '+lastP.y : '')+'.': ''),
+      'insight-box--positive');
+  })();
+
+  // FX Rate
+  (function() {
+    var act  = CHARTS.fx_rate.datasets[0].data;
+    var prj  = CHARTS.fx_rate.datasets[1].data;
+    var lbls = CHARTS.fx_rate.labels;
+    var actP = act.map(function(v,i){return{v:v,l:lbls[i]};}).filter(function(p){return p.v!==null;});
+    var prjP = prj.map(function(v,i){return{v:v,l:lbls[i]};}).filter(function(p){return p.v!==null;});
+    if (!actP.length) return;
+    var first = actP[0], last = actP[actP.length-1];
+    var lastProj = prjP[prjP.length-1];
+    // Find start of peso appreciation streak (consecutive months of decline from end)
+    var appStart = null;
+    for (var i = actP.length-1; i > 0; i--) {
+      if (actP[i].v < actP[i-1].v) { appStart = actP[i].l; } else { break; }
+    }
+    setEl('insight_fx_rate',
+      'El ARS/USD pasó de <strong>$'+Math.round(first.v)+'</strong> ('+first.l+') a <strong>$'+Math.round(last.v)+'</strong> ('+last.l+')'+
+      (appStart ? ', con apreciación del peso desde '+appStart : '')+'. '+
+      (lastProj ? 'El REM-BCRA proyecta <strong>$'+Math.round(lastProj.v)+'</strong> para '+lastProj.l+'.' : ''));
+  })();
+
+  // Devaluación
+  (function() {
+    var d = CHARTS.devaluacion.datasets[0].data;
+    var l = CHARTS.devaluacion.labels;
+    var pairs = d.map(function(v,i){return{v:v,l:l[i]};}).filter(function(p){return p.v!==null;});
+    if (!pairs.length) return;
+    var mx   = pairs.reduce(function(a,b){return b.v>a.v?b:a;});
+    var last = pairs[pairs.length-1];
+    var appCount = pairs.filter(function(p){return p.v<0;}).length;
+    setEl('insight_devaluacion',
+      'Máximo: <strong>'+mx.v+'%</strong> ('+mx.l+') post-salida del crawling peg. '+
+      (appCount>0 ? 'Se registran <strong>'+appCount+' mes'+(appCount>1?'es':'')+'</strong> de apreciación del peso. ' : '')+
+      'Último: <strong>'+(last.v<0 ? '−'+absRound(last.v) : '+'+last.v)+'%</strong> ('+last.l+'). '+
+      '<span style="color:var(--green);font-weight:700">Verde</span> = apreciación.',
+      last.v < 0 ? 'insight-box--positive' : '');
+  })();
+
+  // PBI Sectorial
+  (function() {
+    var d = CHARTS.pbi_sectorial.datasets[0].data;
+    var l = CHARTS.pbi_sectorial.labels;
+    var pairs = l.map(function(lbl,i){return{l:lbl,v:d[i]};}).sort(function(a,b){return b.v-a.v;});
+    var t1=pairs[0], t2=pairs[1], b1=pairs[pairs.length-1], b2=pairs[pairs.length-2];
+    setEl('insight_pbi_sectorial',
+      t1.l+' (<strong>+'+t1.v+'%</strong>) y '+t2.l+' (<strong>+'+t2.v+'%</strong>) lideran el crecimiento. '+
+      b1.l+' (<strong>'+b1.v+'%</strong>) y '+b2.l+' (<strong>'+b2.v+'%</strong>) registran las mayores caídas. Fuente: CEPAL/INDEC.',
+      'insight-box--critical');
+  })();
+
+  // IPC Comparativo
+  (function() {
+    var calzD = CHARTS.ipc_comparativo.datasets[1].data;
+    var lbls  = CHARTS.ipc_comparativo.labels;
+    var pairs = calzD.map(function(v,i){return{v:v,l:lbls[i]};}).filter(function(p){return p.v!==null;});
+    if (!pairs.length) return;
+    var mx    = pairs.reduce(function(a,b){return b.v>a.v?b:a;});
+    var defMo = pairs.filter(function(p){return p.v<0;});
+    setEl('insight_ipc_comparativo',
+      'La inflación en prendas y calzado es más volátil que el índice general. Pico sectorial: <strong>'+mx.v+'%</strong> ('+mx.l+').'+
+      (defMo.length>0 ? ' Deflación en '+defMo.map(function(p){return p.l+' ('+p.v+'%)';}).join(', ')+'.' : '')+
+      ' Serie desde '+lbls[0]+'.');
+  })();
+
+  // Discriminada
+  (function() {
+    var disc  = CHARTS.discriminada;
+    var years = disc.labels;
+    var calz  = disc.datasets[0].data;
+    var app   = disc.datasets[1].data;
+    var gen   = disc.datasets[2].data;
+    // Full-year index = label with no '(' character
+    var fullIdx = 0;
+    for (var i=0; i<years.length; i++) { if (years[i].indexOf('(')<0) { fullIdx=i; break; } }
+    var c0=calz[fullIdx], a0=app[fullIdx], g0=gen[fullIdx];
+    var belowGen = g0!==null && c0<g0 && a0<g0;
+    var parts = years.map(function(y,i) {
+      if (calz[i]===null && app[i]===null) return null;
+      var txt = '<strong>'+y+'</strong>: Calzado '+calz[i]+'%, APP '+app[i]+'%';
+      if (gen[i]!==null) { txt += ', IPC gral '+gen[i]+'%'; }
+      if (gen[i]!==null && calz[i]<gen[i] && app[i]<gen[i]) txt += ' <em>(sector bajo IPC)</em>';
+      else if (gen[i]!==null && (calz[i]>gen[i] || app[i]>gen[i])) txt += ' <em>(sector supera IPC)</em>';
+      return txt+'.';
+    }).filter(Boolean);
+    var intro = belowGen
+      ? 'En '+years[fullIdx]+', Calzado (<strong>'+c0+'%</strong>) e Indumentaria (<strong>'+a0+'%</strong>) inflaron muy por debajo del IPC general (<strong>'+g0+'%</strong>), implicando caída real de precios del sector. '
+      : '';
+    setEl('insight_discriminada', intro + parts.join(' '), belowGen ? 'insight-box--positive' : '');
+  })();
+}
+
+renderInsights();
 renderAnalysis();
 
 // ── Palette icon buttons ──────────────────────────────────────────────────
