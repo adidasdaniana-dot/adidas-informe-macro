@@ -750,7 +750,7 @@ var CHARTS = {
     labels: ["jul-24","ago-24","sep-24","oct-24","nov-24","dic-24","ene-25","feb-25","mar-25","abr-25","may-25","jun-25","jul-25","ago-25","sep-25","oct-25","nov-25","dic-25","ene-26","feb-26","mar-26","abr-26"],
     datasets: [
       {label:"Nacional (%)", data:[4.0,4.2,3.5,2.7,2.4,2.7,2.2,2.4,3.7,2.8,1.5,1.6,1.9,1.9,2.1,2.3,2.5,2.8,2.9,2.9,3.4,2.6], color:"#000000", dash:false},
-      {label:"Prendas y Calzado (%)", data:[1.6,2.1,6.0,4.4,1.9,1.6,-0.7,0.4,4.6,3.8,0.9,0.5,-0.9,-0.3,2.1,2.4,0.5,1.1,-0.5,0.0,3.1,3.2], color:"#767677", dash:false}
+      {label:"Prendas y Calzado (%)", data:[1.6,2.1,6.0,4.4,1.9,1.6,-0.7,0.4,4.6,3.8,0.9,0.5,-0.9,-0.3,2.1,2.4,0.5,1.1,-0.5,0,3.1,3.2], color:"#767677", dash:false}
     ]
   },
   pbi: {
@@ -767,8 +767,8 @@ var CHARTS = {
     type: 'line', yLabel: 'ARS', granularity: 'month',
     labels: ["jul-24","ago-24","sep-24","oct-24","nov-24","dic-24","ene-25","feb-25","mar-25","abr-25","may-25","jun-25","jul-25","ago-25","sep-25","oct-25","nov-25","dic-25","ene-26","feb-26","mar-26","abr-26","may-26","jun-26","jul-26","ago-26","sep-26"],
     datasets: [
-      {label:"ARS/USD (real)", data:[923.77,942.92,961.83,981.57,1001.84,1020.71,1043.56,1058.46,1069.03,1121.57,1147.53,1181.36,1267.02,1329.54,1399.90,1432.02,1427.62,1447.84,1449.33,1409.66,1396.34,1381.45,null,null,null,null,null], color:"#000000", dash:false},
-      {label:"ARS/USD (proyección)", data:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1381.45,1449,1481,1504,1533,1572], color:"#aaaaaa", dash:true}
+      {label:"ARS/USD (real)", data:[923.77,942.92,961.83,981.57,1001.84,1020.71,1043.56,1058.46,1069.03,1121.57,1147.53,1181.36,1267.02,1329.54,1399.9,1432.02,1427.62,1447.84,1449.33,1409.66,1396.34,1381.45,null,null,null,null,null], color:"#000000", dash:false},
+      {label:"ARS/USD (proyección)", data:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1381.45,1449.0,1481.0,1504.0,1533.0,1572.0], color:"#aaaaaa", dash:true}
     ]
   },
   devaluacion: {
@@ -776,17 +776,17 @@ var CHARTS = {
     type: 'bar_conditional', yLabel: '%', granularity: 'month',
     labels: ["jul-24","ago-24","sep-24","oct-24","nov-24","dic-24","ene-25","feb-25","mar-25","abr-25","may-25","jun-25","jul-25","ago-25","sep-25","oct-25","nov-25","dic-25","ene-26","feb-26","mar-26","abr-26"],
     datasets: [
-      {label:"Devaluación (%)", data:[2.21,2.07,2.00,2.05,2.07,1.88,2.24,1.43,1.00,4.91,2.31,2.95,7.25,4.93,5.29,2.29,-0.31,1.42,0.10,-2.74,-0.94,-1.07], color:"CONDITIONAL", dash:false}
+      {label:"Devaluación (%)", data:[2.21,2.07,2.0,2.05,2.07,1.88,2.24,1.43,1.0,4.91,2.31,2.95,7.25,4.93,5.29,2.29,-0.31,1.42,0.1,-2.74,-0.94,-1.07], color:"CONDITIONAL", dash:false}
     ]
   },
   discriminada: {
     title: 'Inflación Acumulada Anual — Calzado y APP', source: 'INDEC',
     type: 'bar', yLabel: '%', granularity: 'year',
-    labels: ["2024 (jul–dic)","2025","2026 (ene–feb)"],
+    labels: ["2024","2025","2026"],
     datasets: [
       {label:"Calzado (%)", data:[17.3,13.5,4.9], color:"#000000", dash:false},
       {label:"Indumentaria / APP (%)", data:[22.4,13.4,0.2], color:"#767677", dash:false},
-      {label:"Inflación General (%)", data:[21.1,31.5,5.9], color:"#c0c0c0", dash:false}
+      {label:"Inflación General (%)", data:[null,null,null], color:"#c0c0c0", dash:false}
     ]
   },
   pbi_sectorial: {
