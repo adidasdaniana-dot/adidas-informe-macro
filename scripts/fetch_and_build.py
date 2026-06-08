@@ -205,47 +205,51 @@ def parse_devaluation(xl: pd.ExcelFile) -> list:
 
 def parse_pbi(xl: pd.ExcelFile) -> list:
     config = json.loads(CONFIG_FILE.read_text())
-    df = pd.read_excel(xl, sheet_name=config["sheet_names"]["pbi"], header=0)
+    df = pd.read_excel(xl, sheet_name=config["sheet_names"]["data"], header=4)
+
+    year_col  = _find_col(df.columns, "Year",        fallback_idx=14)
+    actual_col = _find_col(df.columns, "Banco Mundial", "Crecimiento", fallback_idx=15)
+    proj_col  = _find_col(df.columns, "Expectativas",  fallback_idx=16)
 
     results = []
     for _, row in df.iterrows():
-        label = str(row.iloc[0]).strip() if pd.notna(row.iloc[0]) else ""
-        if not label or label in ("Row Labels", "Grand Total"):
+        year_raw = row[year_col] if year_col else row.iloc[14]
+        if year_raw is None or (isinstance(year_raw, float) and pd.isna(year_raw)):
             continue
         try:
-            year = int(float(label))
+            year = int(float(str(year_raw).strip()))
             if not (2000 <= year <= 2035):
                 continue
-        except ValueError:
+        except (ValueError, TypeError):
             continue
-        actual = _pct_to_float(row.iloc[1])
-        proj = _pct_to_float(row.iloc[2]) if len(row) > 2 else None
+        actual = _pct_to_float(row[actual_col] if actual_col else row.iloc[15])
+        proj   = _pct_to_float(row[proj_col]   if proj_col   else row.iloc[16])
         results.append({"year": str(year), "actual": actual, "proyeccion": proj})
     return results
 
 
 def parse_fx_rate(xl: pd.ExcelFile) -> list:
     config = json.loads(CONFIG_FILE.read_text())
-    df = pd.read_excel(xl, sheet_name=config["sheet_names"]["fx_rate"], header=0)
+    df = pd.read_excel(xl, sheet_name=config["sheet_names"]["data"], header=4)
+
+    # FX date = col 18, actual = col 19, projection = col 20 (Data sheet)
+    date_col  = _find_col(df.columns, "Date.2",     fallback_idx=18)
+    actual_col = _find_col(df.columns, "Fx rate",    fallback_idx=19)
+    proj_col  = _find_col(df.columns, "projection",  fallback_idx=20)
 
     results = []
-    current_year = None
     for _, row in df.iterrows():
-        label = str(row.iloc[0]).strip() if pd.notna(row.iloc[0]) else ""
-        if not label or label in ("Row Labels", "Grand Total"):
+        date_val = row[date_col] if date_col else row.iloc[18]
+        if date_val is None or (isinstance(date_val, float) and pd.isna(date_val)):
             continue
-        if re.match(r"^\d{4}$", label):
-            current_year = label[-2:]
+        actual = _currency_to_float(row[actual_col] if actual_col else row.iloc[19])
+        proj   = _currency_to_float(row[proj_col]   if proj_col   else row.iloc[20])
+        if actual is None and proj is None:
             continue
-        if current_year is None:
+        period = _format_date(date_val)
+        # Skip the column-name row that bleeds into data
+        if not re.match(r"[a-z]{3}-\d{2}", period):
             continue
-        month = label.lower()
-        month_num = MONTHS_ES_INV.get(month[:3])
-        if not month_num:
-            continue
-        period = f"{month[:3]}-{current_year}"
-        actual = _currency_to_float(row.iloc[1]) if len(row) > 1 else None
-        proj = _currency_to_float(row.iloc[2]) if len(row) > 2 else None
         results.append({"period": period, "actual": actual, "proyeccion": proj})
     return results
 
@@ -314,20 +318,20 @@ def build_charts_js(ipc, devaluation, pbi, fx, disc) -> str:
     # IPC lookup: map "mmm-yy" → monthly value
     ipc_map = {r["date"]: r["inflacion_nacional"] for r in ipc}
 
-    def _cumul_ipc(year_str, months):
-        """Compute cumulative IPC % for a list of month names within a year."""
+    def _sum_ipc(year_str, months):
+        """Simple sum of IPC monthly % — same method the sheet uses for calzado/APP totals."""
         yy = year_str[-2:]
-        product = 1.0
+        total = 0.0
         found = 0
         for m in months:
             key = f"{m}-{yy}"
             val = ipc_map.get(key)
             if val is not None:
-                product *= (1 + val / 100)
+                total += val
                 found += 1
         if found == 0:
             return None
-        return round((product - 1) * 100, 1)
+        return round(total, 1)
 
     def _period_label(year_str, months):
         if len(months) == 12:
@@ -339,7 +343,7 @@ def build_charts_js(ipc, devaluation, pbi, fx, disc) -> str:
     disc_labels = [_period_label(r["year"], r.get("months", [])) for r in disc]
     disc_calzado = _pct_scale([r["calzado"] for r in disc])
     disc_app = _pct_scale([r["app"] for r in disc])
-    disc_general = [_cumul_ipc(r["year"], r.get("months", [])) for r in disc]
+    disc_general = [_sum_ipc(r["year"], r.get("months", [])) for r in disc]
 
     lines = ["var CHARTS = {"]
 
