@@ -128,13 +128,34 @@ def download_excel() -> io.BytesIO:
 
 # ── Excel parsers ─────────────────────────────────────────────────────────────
 
+def _find_col(columns, *patterns, fallback_idx=None):
+    """Find a column by any of the given substring patterns (case-insensitive, accent-stripped).
+    Optionally fall back to a positional index if no pattern matches."""
+    import unicodedata
+
+    def normalize(s):
+        return unicodedata.normalize("NFKD", str(s)).encode("ascii", "ignore").decode().lower().strip()
+
+    normalized_cols = [(c, normalize(c)) for c in columns]
+    for pattern in patterns:
+        pat = normalize(pattern)
+        for orig, norm in normalized_cols:
+            if pat in norm:
+                return orig
+    if fallback_idx is not None and fallback_idx < len(columns):
+        return list(columns)[fallback_idx]
+    return None
+
+
 def parse_ipc(xl: pd.ExcelFile) -> list:
     config = json.loads(CONFIG_FILE.read_text())
     df = pd.read_excel(xl, sheet_name=config["sheet_names"]["data"], header=4)
 
-    date_col = "Date"
-    nacional_col = next((c for c in df.columns if "nivel nacional(%)" in str(c).lower()), None)
-    calzado_col = next((c for c in df.columns if "prendas y calzado" in str(c).lower()), None)
+    print(f"DEBUG Data columns: {list(df.columns)}", file=sys.stderr)
+
+    date_col = _find_col(df.columns, "Date", fallback_idx=1)
+    nacional_col = _find_col(df.columns, "nivel nacional", "inflacion nacional", "ipc nacional", fallback_idx=2)
+    calzado_col = _find_col(df.columns, "prendas y calzado", "calzado a nivel", "inflacion calzado", fallback_idx=4)
 
     if not nacional_col:
         print("WARNING: Could not find national inflation column", file=sys.stderr)
@@ -142,8 +163,8 @@ def parse_ipc(xl: pd.ExcelFile) -> list:
 
     results = []
     for _, row in df.iterrows():
-        date_val = row.get(date_col)
-        if pd.isna(date_val) or str(date_val).strip() == "":
+        date_val = row.get(date_col) if date_col else None
+        if date_val is None or pd.isna(date_val) or str(date_val).strip() == "":
             continue
         infl = _pct_to_float(row.get(nacional_col))
         if infl is None:
@@ -161,11 +182,12 @@ def parse_devaluation(xl: pd.ExcelFile) -> list:
     config = json.loads(CONFIG_FILE.read_text())
     df = pd.read_excel(xl, sheet_name=config["sheet_names"]["data"], header=4)
 
-    date_col = "Date.3"
-    dev_col = next((c for c in df.columns if "devaluation" in str(c).lower()), None)
+    # 4th Date column becomes 'Date.3'; fall back to positional index 22
+    date_col = _find_col(df.columns, "Date.3", fallback_idx=22)
+    dev_col = _find_col(df.columns, "devaluation", "devaluacion", "devaluación", fallback_idx=24)
 
-    if date_col not in df.columns or not dev_col:
-        print("WARNING: Devaluation columns not found", file=sys.stderr)
+    if not date_col or not dev_col:
+        print(f"WARNING: Devaluation columns not found (date_col={date_col}, dev_col={dev_col})", file=sys.stderr)
         return []
 
     results = []
@@ -433,6 +455,16 @@ def main():
     print(f"  PBI rows: {len(pbi)}")
     print(f"  FX Rate rows: {len(fx)}")
     print(f"  Discriminada rows: {len(disc)}")
+
+    # Guard: abort if critical data is missing — never overwrite HTML with empty arrays
+    if len(ipc) == 0 or len(devaluation) == 0:
+        print(
+            "ERROR: Critical data is empty (IPC or Devaluation). "
+            "Aborting HTML update to preserve existing report. "
+            "Check Data sheet column names.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
     new_hash = compute_hash(ipc, devaluation, pbi, fx, disc)
 
