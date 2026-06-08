@@ -415,13 +415,20 @@
     .chart-card:hover { outline: 2px solid var(--black); }
 
     /* ── Chart entrance animation ── */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
     .chart-card {
-      opacity: 0; transform: translateY(18px);
-      transition: opacity 0.45s ease, transform 0.45s ease;
+      animation: fadeInUp 0.45s ease both;
     }
-    .chart-card.visible {
-      opacity: 1; transform: translateY(0);
-    }
+    .charts-grid .chart-card:nth-child(2) { animation-delay: 0.08s; }
+    .charts-grid .chart-card:nth-child(3) { animation-delay: 0.16s; }
+    .charts-grid .chart-card:nth-child(4) { animation-delay: 0.24s; }
+    .charts-grid .chart-card:nth-child(5) { animation-delay: 0.32s; }
+    .charts-grid .chart-card:nth-child(6) { animation-delay: 0.40s; }
+    /* keep .visible for scroll-triggered re-triggering compatibility */
+    .chart-card.visible { opacity: 1; transform: translateY(0); }
 
     /* ── Alternating section backgrounds ── */
     .kpi-section { background: var(--white); }
@@ -436,8 +443,7 @@
       .sticky-nav, .btn-download, .btn-palette, .btn-toggle-labels,
       .color-panel, .palette-btn { display: none !important; }
       .report-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .chart-card { opacity: 1 !important; transform: none !important;
-        break-inside: avoid; page-break-inside: avoid; }
+      .chart-card { animation: none !important; break-inside: avoid; page-break-inside: avoid; }
       .section { break-inside: avoid; }
       .section:nth-child(even) { background: #f7f7f7 !important;
         -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -1608,24 +1614,6 @@ renderAnalysis();
 
 </script>
 
-<script>
-// Chart entrance animation via IntersectionObserver
-(function() {
-  if (!('IntersectionObserver' in window)) {
-    document.querySelectorAll('.chart-card').forEach(function(el) { el.classList.add('visible'); });
-    return;
-  }
-  var io = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        io.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.08 });
-  document.querySelectorAll('.chart-card').forEach(function(el) { io.observe(el); });
-})();
-</script>
 
 <div class="color-backdrop" id="colorBackdrop" onclick="closeColorPanel()"></div>
 <div class="color-panel" id="colorPanel">
