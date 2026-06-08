@@ -315,8 +315,8 @@ def build_charts_js(ipc, devaluation, pbi, fx, disc) -> str:
     fx_proj = [round(r["proyeccion"], 2) if r["proyeccion"] is not None else None for r in fx]
 
     # Build discriminada period labels and compute cumulative IPC for each period
-    # IPC lookup: map "mmm-yy" → monthly value
-    ipc_map = {r["date"]: r["inflacion_nacional"] for r in ipc}
+    # ipc_map uses the already-scaled values (pct_scale converts 0.04 → 4.0 for Excel % cells)
+    ipc_map = dict(zip(ipc_dates, ipc_nacional))
 
     def _sum_ipc(year_str, months):
         """Simple sum of IPC monthly % — same method the sheet uses for calzado/APP totals."""
