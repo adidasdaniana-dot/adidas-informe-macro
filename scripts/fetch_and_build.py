@@ -255,15 +255,29 @@ def parse_inflacion_discriminada(xl: pd.ExcelFile) -> list:
     df = pd.read_excel(xl, sheet_name=config["sheet_names"]["inflacion_discriminada"], header=0)
 
     results = []
+    current_months = []
     for _, row in df.iterrows():
         label = str(row.iloc[0]).strip() if pd.notna(row.iloc[0]) else ""
-        if "Total" not in label:
+        if not label:
             continue
-        year = label.replace(" Total", "").strip()
-        calzado = _pct_to_float(row.iloc[1]) if len(row) > 1 else None
-        app = _pct_to_float(row.iloc[2]) if len(row) > 2 else None
-        infl_general = _pct_to_float(row.iloc[3]) if len(row) > 3 else None
-        results.append({"year": year, "calzado": calzado, "app": app, "infl_general": infl_general})
+        if "Total" in label:
+            year = label.replace(" Total", "").strip()
+            calzado = _pct_to_float(row.iloc[1]) if len(row) > 1 else None
+            app = _pct_to_float(row.iloc[2]) if len(row) > 2 else None
+            results.append({
+                "year": year,
+                "calzado": calzado,
+                "app": app,
+                "months": list(current_months),
+            })
+            current_months = []
+        elif re.match(r"^\d{4}$", label):
+            current_months = []
+        else:
+            # Month detail row (e.g. " jul", " ago")
+            month = label.lower().strip()[:3]
+            if month in MONTHS_ES_INV:
+                current_months.append(month)
     return results
 
 
@@ -296,10 +310,36 @@ def build_charts_js(ipc, devaluation, pbi, fx, disc) -> str:
     fx_actual = [round(r["actual"], 2) if r["actual"] is not None else None for r in fx]
     fx_proj = [round(r["proyeccion"], 2) if r["proyeccion"] is not None else None for r in fx]
 
-    disc_years = [r["year"] for r in disc]
+    # Build discriminada period labels and compute cumulative IPC for each period
+    # IPC lookup: map "mmm-yy" → monthly value
+    ipc_map = {r["date"]: r["inflacion_nacional"] for r in ipc}
+
+    def _cumul_ipc(year_str, months):
+        """Compute cumulative IPC % for a list of month names within a year."""
+        yy = year_str[-2:]
+        product = 1.0
+        found = 0
+        for m in months:
+            key = f"{m}-{yy}"
+            val = ipc_map.get(key)
+            if val is not None:
+                product *= (1 + val / 100)
+                found += 1
+        if found == 0:
+            return None
+        return round((product - 1) * 100, 1)
+
+    def _period_label(year_str, months):
+        if len(months) == 12:
+            return year_str
+        if not months:
+            return year_str
+        return f"{year_str} ({months[0]}–{months[-1]})"
+
+    disc_labels = [_period_label(r["year"], r.get("months", [])) for r in disc]
     disc_calzado = _pct_scale([r["calzado"] for r in disc])
     disc_app = _pct_scale([r["app"] for r in disc])
-    disc_general = _pct_scale([r.get("infl_general") for r in disc])
+    disc_general = [_cumul_ipc(r["year"], r.get("months", [])) for r in disc]
 
     lines = ["var CHARTS = {"]
 
@@ -354,7 +394,7 @@ def build_charts_js(ipc, devaluation, pbi, fx, disc) -> str:
     lines.append(f"  discriminada: {{")
     lines.append(f"    title: 'Inflación Acumulada Anual — Calzado y APP', source: 'INDEC',")
     lines.append(f"    type: 'bar', yLabel: '%', granularity: 'year',")
-    lines.append(f"    labels: {_js_str_list(disc_years)},")
+    lines.append(f"    labels: {_js_str_list(disc_labels)},")
     lines.append(f"    datasets: [")
     lines.append(f'      {{label:"Calzado (%)", data:{_js_list(disc_calzado)}, color:"#000000", dash:false}},')
     lines.append(f'      {{label:"Indumentaria / APP (%)", data:{_js_list(disc_app)}, color:"#767677", dash:false}},')
