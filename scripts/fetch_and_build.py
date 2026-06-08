@@ -1,7 +1,8 @@
 """
-Fetch Adidas macro report Excel from Google Drive, parse it, and generate docs/index.html.
+Fetch Adidas macro report Excel from Google Drive, parse it, and surgically
+update var CHARTS in docs/index.html. Never regenerates the full HTML.
 Reads GOOGLE_SHEETS_CREDENTIALS (service account JSON) and SHEET_FILE_ID from env vars.
-Skips rebuild if data hasn't changed (SHA-256 hash comparison).
+Skips update if data hasn't changed (SHA-256 hash comparison).
 """
 
 import hashlib
@@ -17,14 +18,13 @@ import pandas as pd
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
-from jinja2 import Environment, FileSystemLoader
 
 SCRIPT_DIR = Path(__file__).parent
 REPO_ROOT = SCRIPT_DIR.parent
 CONFIG_FILE = REPO_ROOT / "config" / "sheet_config.json"
 DOCS_DIR = REPO_ROOT / "docs"
 HASH_FILE = DOCS_DIR / ".data_hash"
-TEMPLATE_DIR = SCRIPT_DIR / "templates"
+INDEX_HTML = DOCS_DIR / "index.html"
 
 MONTHS_ES = {
     "01": "ene", "02": "feb", "03": "mar", "04": "abr",
@@ -74,6 +74,36 @@ def _format_date(val):
     return s
 
 
+def _pct_scale(data):
+    """If all non-null values look like decimals (|val| < 0.5), multiply by 100."""
+    non_null = [v for v in data if v is not None]
+    if not non_null:
+        return data
+    if max(abs(v) for v in non_null) < 0.5:
+        return [round(v * 100, 2) if v is not None else None for v in data]
+    return [round(v, 4) if v is not None else None for v in data]
+
+
+def _js_val(v):
+    """Format a Python value as JavaScript literal."""
+    if v is None:
+        return "null"
+    if isinstance(v, bool):
+        return "true" if v else "false"
+    if isinstance(v, float):
+        # Avoid Python's -0.0
+        return str(v) if v != 0 else "0"
+    return str(v)
+
+
+def _js_list(lst):
+    return "[" + ",".join(_js_val(v) for v in lst) + "]"
+
+
+def _js_str_list(lst):
+    return "[" + ",".join(f'"{v}"' for v in lst) + "]"
+
+
 # ── Google Drive download ─────────────────────────────────────────────────────
 
 def download_excel() -> io.BytesIO:
@@ -83,8 +113,7 @@ def download_excel() -> io.BytesIO:
         creds_dict,
         scopes=["https://www.googleapis.com/auth/drive.readonly"],
     )
-    config = json.loads(CONFIG_FILE.read_text())
-    file_id = os.environ["SHEET_FILE_ID"]  # required GitHub Secret
+    file_id = os.environ["SHEET_FILE_ID"]
 
     service = build("drive", "v3", credentials=credentials)
     request = service.files().get_media(fileId=file_id)
@@ -100,14 +129,12 @@ def download_excel() -> io.BytesIO:
 # ── Excel parsers ─────────────────────────────────────────────────────────────
 
 def parse_ipc(xl: pd.ExcelFile) -> list:
-    """Parse IPC monthly data from Data sheet (columns Date, national %, clothing %)."""
     config = json.loads(CONFIG_FILE.read_text())
     df = pd.read_excel(xl, sheet_name=config["sheet_names"]["data"], header=4)
 
-    # Pandas renames duplicate columns: Date, Date.1, Date.2, Date.3
     date_col = "Date"
-    nacional_col = next((c for c in df.columns if "nivel nacional(%)" in c), None)
-    calzado_col = next((c for c in df.columns if "prendas y calzado" in c and "nacional" in c), None)
+    nacional_col = next((c for c in df.columns if "nivel nacional(%)" in str(c).lower()), None)
+    calzado_col = next((c for c in df.columns if "prendas y calzado" in str(c).lower()), None)
 
     if not nacional_col:
         print("WARNING: Could not find national inflation column", file=sys.stderr)
@@ -131,13 +158,11 @@ def parse_ipc(xl: pd.ExcelFile) -> list:
 
 
 def parse_devaluation(xl: pd.ExcelFile) -> list:
-    """Parse monthly peso devaluation from Data sheet (4th Date block, Devaluation %)."""
     config = json.loads(CONFIG_FILE.read_text())
     df = pd.read_excel(xl, sheet_name=config["sheet_names"]["data"], header=4)
 
-    # 4th Date column becomes 'Date.3'
     date_col = "Date.3"
-    dev_col = next((c for c in df.columns if "Devaluation" in c or "devaluation" in c), None)
+    dev_col = next((c for c in df.columns if "devaluation" in str(c).lower()), None)
 
     if date_col not in df.columns or not dev_col:
         print("WARNING: Devaluation columns not found", file=sys.stderr)
@@ -157,7 +182,6 @@ def parse_devaluation(xl: pd.ExcelFile) -> list:
 
 
 def parse_pbi(xl: pd.ExcelFile) -> list:
-    """Parse annual GDP growth from PBI pivot sheet."""
     config = json.loads(CONFIG_FILE.read_text())
     df = pd.read_excel(xl, sheet_name=config["sheet_names"]["pbi"], header=0)
 
@@ -166,7 +190,6 @@ def parse_pbi(xl: pd.ExcelFile) -> list:
         label = str(row.iloc[0]).strip() if pd.notna(row.iloc[0]) else ""
         if not label or label in ("Row Labels", "Grand Total"):
             continue
-        # Year rows are 4-digit numbers
         try:
             year = int(float(label))
             if not (2000 <= year <= 2035):
@@ -180,7 +203,6 @@ def parse_pbi(xl: pd.ExcelFile) -> list:
 
 
 def parse_fx_rate(xl: pd.ExcelFile) -> list:
-    """Parse FX rate from hierarchical FX Rate pivot sheet."""
     config = json.loads(CONFIG_FILE.read_text())
     df = pd.read_excel(xl, sheet_name=config["sheet_names"]["fx_rate"], header=0)
 
@@ -190,14 +212,12 @@ def parse_fx_rate(xl: pd.ExcelFile) -> list:
         label = str(row.iloc[0]).strip() if pd.notna(row.iloc[0]) else ""
         if not label or label in ("Row Labels", "Grand Total"):
             continue
-        # Detect year rows
         if re.match(r"^\d{4}$", label):
             current_year = label[-2:]
             continue
         if current_year is None:
             continue
         month = label.lower()
-        # Map Spanish month abbreviations
         month_num = MONTHS_ES_INV.get(month[:3])
         if not month_num:
             continue
@@ -209,7 +229,6 @@ def parse_fx_rate(xl: pd.ExcelFile) -> list:
 
 
 def parse_inflacion_discriminada(xl: pd.ExcelFile) -> list:
-    """Parse annual calzado/APP totals from Inflacion discriminada pivot sheet."""
     config = json.loads(CONFIG_FILE.read_text())
     df = pd.read_excel(xl, sheet_name=config["sheet_names"]["inflacion_discriminada"], header=0)
 
@@ -221,76 +240,26 @@ def parse_inflacion_discriminada(xl: pd.ExcelFile) -> list:
         year = label.replace(" Total", "").strip()
         calzado = _pct_to_float(row.iloc[1]) if len(row) > 1 else None
         app = _pct_to_float(row.iloc[2]) if len(row) > 2 else None
-        results.append({"year": year, "calzado": calzado, "app": app})
+        infl_general = _pct_to_float(row.iloc[3]) if len(row) > 3 else None
+        results.append({"year": year, "calzado": calzado, "app": app, "infl_general": infl_general})
     return results
 
 
-# ── Chart data builder ────────────────────────────────────────────────────────
+# ── Build CHARTS JS block ─────────────────────────────────────────────────────
 
-def _latest_nonnull(data_list, key):
-    for item in reversed(data_list):
-        if item.get(key) is not None:
-            return item
-    return None
+def build_charts_js(ipc, devaluation, pbi, fx, disc) -> str:
+    """Build the var CHARTS = {...}; JS block to inject into index.html."""
 
+    ipc_dates = [r["date"] for r in ipc]
+    ipc_nacional = _pct_scale([r["inflacion_nacional"] for r in ipc])
+    ipc_calzado = _pct_scale([r["inflacion_calzado"] for r in ipc])
 
-def _compute_insights(ipc, devaluation, pbi, fx, disc):
-    insights = {}
+    dev_dates = [r["date"] for r in devaluation]
+    dev_vals = _pct_scale([r["devaluacion"] for r in devaluation])
 
-    if ipc:
-        latest = _latest_nonnull(ipc, "inflacion_nacional")
-        peak = max(ipc, key=lambda r: r["inflacion_nacional"] or -999)
-        trough = min(ipc, key=lambda r: r["inflacion_nacional"] if r["inflacion_nacional"] is not None else 999)
-        insights["ipc_nacional"] = (
-            f"Pico: <strong>{peak['inflacion_nacional']}%</strong> ({peak['date']}). "
-            f"Mínimo: <strong>{trough['inflacion_nacional']}%</strong> ({trough['date']}). "
-            f"Último dato: <strong>{latest['inflacion_nacional']}%</strong> ({latest['date']})."
-        )
-        insights["ipc_comparativo"] = (
-            "La inflación en prendas y calzado es más volátil que el índice general. "
-            "Los valores negativos indican deflación puntual en esa categoría."
-        )
-
-    if pbi:
-        latest_actual = _latest_nonnull(pbi, "actual")
-        latest_proj = _latest_nonnull(pbi, "proyeccion")
-        insights["pbi"] = (
-            f"Último dato real: <strong>{latest_actual['actual']}%</strong> ({latest_actual['year']}). "
-            f"Proyección más reciente: <strong>{latest_proj['proyeccion']}%</strong> ({latest_proj['year']}). "
-            "Fuente: Banco Mundial / REM-BCRA."
-        )
-
-    if fx:
-        latest_actual = _latest_nonnull(fx, "actual")
-        latest_proj = _latest_nonnull(fx, "proyeccion")
-        insights["fx_rate"] = (
-            f"Tipo de cambio actual: <strong>${latest_actual['actual']:,.2f}</strong> ({latest_actual['period']}). "
-            f"Proyección: <strong>${latest_proj['proyeccion']:,.0f}</strong> ({latest_proj['period']}). "
-            "Fuente: REM-BCRA."
-        )
-
-    if devaluation:
-        latest = _latest_nonnull(devaluation, "devaluacion")
-        peak = max(devaluation, key=lambda r: r["devaluacion"] or -999)
-        insights["devaluacion"] = (
-            f"Máximo mensual: <strong>{peak['devaluacion']}%</strong> ({peak['date']}). "
-            f"Último dato: <strong>{latest['devaluacion']}%</strong> ({latest['date']}). "
-            "Valores negativos indican apreciación del peso."
-        )
-
-    if disc:
-        latest = disc[-1] if disc else None
-        insights["discriminada"] = (
-            f"Año más reciente ({latest['year']}): calzado <strong>{latest['calzado']}%</strong>, "
-            f"indumentaria <strong>{latest['app']}%</strong>. "
-            "Suma de inflaciones mensuales por categoría."
-        )
-
-    return insights
-
-
-def build_chart_payload(ipc, devaluation, pbi, fx, disc):
-    insights = _compute_insights(ipc, devaluation, pbi, fx, disc)
+    pbi_years = [r["year"] for r in pbi]
+    pbi_actual = _pct_scale([r["actual"] for r in pbi])
+    pbi_proj = _pct_scale([r["proyeccion"] for r in pbi])
 
     # Overlap projection with last actual for smooth line connection
     if fx:
@@ -298,157 +267,100 @@ def build_chart_payload(ipc, devaluation, pbi, fx, disc):
             (i for i, r in enumerate(fx) if r["actual"] is not None), default=None
         )
         if last_actual_idx is not None and last_actual_idx + 1 < len(fx):
-            if fx[last_actual_idx + 1]["proyeccion"] is None:
-                pass
-            else:
+            if fx[last_actual_idx + 1]["proyeccion"] is not None:
                 fx[last_actual_idx]["proyeccion"] = fx[last_actual_idx]["actual"]
 
-    return [
-        {
-            "section": "Contexto Macroeconómico",
-            "subtitle": "Argentina · Datos INDEC / Banco Mundial / REM-BCRA",
-            "charts": [
-                {
-                    "id": "ipc_nacional",
-                    "title": "IPC — Inflación Mensual Nacional",
-                    "source": "INDEC",
-                    "labels": [r["date"] for r in ipc],
-                    "datasets": [
-                        {
-                            "label": "Inflación (%)",
-                            "data": [r["inflacion_nacional"] for r in ipc],
-                            "color": "#000000",
-                            "dash": False,
-                        }
-                    ],
-                    "type": "line",
-                    "yLabel": "%",
-                    "insight": insights.get("ipc_nacional", ""),
-                },
-                {
-                    "id": "pbi",
-                    "title": "Crecimiento del PBI Argentina",
-                    "source": "Banco Mundial / REM-BCRA",
-                    "labels": [r["year"] for r in pbi],
-                    "datasets": [
-                        {
-                            "label": "Real (%)",
-                            "data": [r["actual"] for r in pbi],
-                            "color": "#000000",
-                            "dash": False,
-                        },
-                        {
-                            "label": "Proyección (%)",
-                            "data": [r["proyeccion"] for r in pbi],
-                            "color": "#aaaaaa",
-                            "dash": True,
-                        },
-                    ],
-                    "type": "bar",
-                    "yLabel": "%",
-                    "insight": insights.get("pbi", ""),
-                },
-                {
-                    "id": "fx_rate",
-                    "title": "Tipo de Cambio ARS / USD",
-                    "source": "BCRA / REM-BCRA",
-                    "labels": [r["period"] for r in fx],
-                    "datasets": [
-                        {
-                            "label": "ARS/USD (real)",
-                            "data": [r["actual"] for r in fx],
-                            "color": "#000000",
-                            "dash": False,
-                        },
-                        {
-                            "label": "ARS/USD (proyección)",
-                            "data": [r["proyeccion"] for r in fx],
-                            "color": "#aaaaaa",
-                            "dash": True,
-                        },
-                    ],
-                    "type": "line",
-                    "yLabel": "ARS",
-                    "insight": insights.get("fx_rate", ""),
-                },
-                {
-                    "id": "devaluacion",
-                    "title": "Devaluación Mensual del Peso",
-                    "source": "BCRA / REM-BCRA",
-                    "labels": [r["date"] for r in devaluation],
-                    "datasets": [
-                        {
-                            "label": "Devaluación (%)",
-                            "data": [r["devaluacion"] for r in devaluation],
-                            "color": "CONDITIONAL",
-                            "dash": False,
-                        }
-                    ],
-                    "type": "bar_conditional",
-                    "yLabel": "%",
-                    "insight": insights.get("devaluacion", ""),
-                },
-            ],
-        },
-        {
-            "section": "Sector Calzado e Indumentaria",
-            "subtitle": "Impacto en categorías clave de adidas",
-            "charts": [
-                {
-                    "id": "ipc_comparativo",
-                    "title": "Prendas y Calzado vs. Inflación General",
-                    "source": "INDEC",
-                    "labels": [r["date"] for r in ipc],
-                    "datasets": [
-                        {
-                            "label": "Nacional (%)",
-                            "data": [r["inflacion_nacional"] for r in ipc],
-                            "color": "#000000",
-                            "dash": False,
-                        },
-                        {
-                            "label": "Prendas y Calzado (%)",
-                            "data": [r["inflacion_calzado"] for r in ipc],
-                            "color": "#767677",
-                            "dash": False,
-                        },
-                    ],
-                    "type": "line",
-                    "yLabel": "%",
-                    "insight": insights.get("ipc_comparativo", ""),
-                },
-                {
-                    "id": "discriminada",
-                    "title": "Inflación Acumulada Anual — Calzado y APP",
-                    "source": "INDEC (discriminada por región)",
-                    "labels": [r["year"] for r in disc],
-                    "datasets": [
-                        {
-                            "label": "Calzado (%)",
-                            "data": [r["calzado"] for r in disc],
-                            "color": "#000000",
-                            "dash": False,
-                        },
-                        {
-                            "label": "Indumentaria / APP (%)",
-                            "data": [r["app"] for r in disc],
-                            "color": "#767677",
-                            "dash": False,
-                        },
-                    ],
-                    "type": "bar",
-                    "yLabel": "%",
-                    "insight": insights.get("discriminada", ""),
-                },
-            ],
-        },
-    ]
+    fx_periods = [r["period"] for r in fx]
+    fx_actual = [round(r["actual"], 2) if r["actual"] is not None else None for r in fx]
+    fx_proj = [round(r["proyeccion"], 2) if r["proyeccion"] is not None else None for r in fx]
+
+    disc_years = [r["year"] for r in disc]
+    disc_calzado = _pct_scale([r["calzado"] for r in disc])
+    disc_app = _pct_scale([r["app"] for r in disc])
+    disc_general = _pct_scale([r.get("infl_general") for r in disc])
+
+    lines = ["var CHARTS = {"]
+
+    lines.append(f"  ipc_nacional: {{")
+    lines.append(f"    title: 'IPC — Inflación Mensual Nacional', source: 'INDEC',")
+    lines.append(f"    type: 'line', yLabel: '%', granularity: 'month',")
+    lines.append(f"    labels: {_js_str_list(ipc_dates)},")
+    lines.append(f"    datasets: [")
+    lines.append(f'      {{label:"Inflación (%)", data:{_js_list(ipc_nacional)}, color:"#000000", dash:false}}')
+    lines.append(f"    ]")
+    lines.append(f"  }},")
+
+    lines.append(f"  ipc_comparativo: {{")
+    lines.append(f"    title: 'Prendas y Calzado vs. Inflación General', source: 'INDEC',")
+    lines.append(f"    type: 'line', yLabel: '%', granularity: 'month',")
+    lines.append(f"    labels: {_js_str_list(ipc_dates)},")
+    lines.append(f"    datasets: [")
+    lines.append(f'      {{label:"Nacional (%)", data:{_js_list(ipc_nacional)}, color:"#000000", dash:false}},')
+    lines.append(f'      {{label:"Prendas y Calzado (%)", data:{_js_list(ipc_calzado)}, color:"#767677", dash:false}}')
+    lines.append(f"    ]")
+    lines.append(f"  }},")
+
+    lines.append(f"  pbi: {{")
+    lines.append(f"    title: 'Crecimiento del PBI Argentina', source: 'Banco Mundial / REM-BCRA',")
+    lines.append(f"    type: 'bar', yLabel: '%', granularity: 'year',")
+    lines.append(f"    labels: {_js_str_list(pbi_years)},")
+    lines.append(f"    datasets: [")
+    lines.append(f'      {{label:"Real (%)", data:{_js_list(pbi_actual)}, color:"#000000", dash:false}},')
+    lines.append(f'      {{label:"Proyección (%)", data:{_js_list(pbi_proj)}, color:"#aaaaaa", dash:true}}')
+    lines.append(f"    ]")
+    lines.append(f"  }},")
+
+    lines.append(f"  fx_rate: {{")
+    lines.append(f"    title: 'Tipo de Cambio ARS / USD', source: 'BCRA / REM-BCRA',")
+    lines.append(f"    type: 'line', yLabel: 'ARS', granularity: 'month',")
+    lines.append(f"    labels: {_js_str_list(fx_periods)},")
+    lines.append(f"    datasets: [")
+    lines.append(f'      {{label:"ARS/USD (real)", data:{_js_list(fx_actual)}, color:"#000000", dash:false}},')
+    lines.append(f'      {{label:"ARS/USD (proyección)", data:{_js_list(fx_proj)}, color:"#aaaaaa", dash:true}}')
+    lines.append(f"    ]")
+    lines.append(f"  }},")
+
+    lines.append(f"  devaluacion: {{")
+    lines.append(f"    title: 'Devaluación Mensual del Peso', source: 'BCRA / REM-BCRA',")
+    lines.append(f"    type: 'bar_conditional', yLabel: '%', granularity: 'month',")
+    lines.append(f"    labels: {_js_str_list(dev_dates)},")
+    lines.append(f"    datasets: [")
+    lines.append(f'      {{label:"Devaluación (%)", data:{_js_list(dev_vals)}, color:"CONDITIONAL", dash:false}}')
+    lines.append(f"    ]")
+    lines.append(f"  }},")
+
+    lines.append(f"  discriminada: {{")
+    lines.append(f"    title: 'Inflación Acumulada Anual — Calzado y APP', source: 'INDEC',")
+    lines.append(f"    type: 'bar', yLabel: '%', granularity: 'year',")
+    lines.append(f"    labels: {_js_str_list(disc_years)},")
+    lines.append(f"    datasets: [")
+    lines.append(f'      {{label:"Calzado (%)", data:{_js_list(disc_calzado)}, color:"#000000", dash:false}},')
+    lines.append(f'      {{label:"Indumentaria / APP (%)", data:{_js_list(disc_app)}, color:"#767677", dash:false}},')
+    lines.append(f'      {{label:"Inflación General (%)", data:{_js_list(disc_general)}, color:"#c0c0c0", dash:false}}')
+    lines.append(f"    ]")
+    lines.append(f"  }},")
+
+    # pbi_sectorial is static (CEPAL data, not in Excel)
+    lines.append(f'  pbi_sectorial: {{')
+    lines.append(f'    title: \'PBI por Sector de Actividad — Q4 2025 vs. LY\', source: \'CEPAL\',')
+    lines.append(f"    type: 'bar_h_conditional', yLabel: '%', granularity: 'sector',")
+    lines.append(f'    labels: ["Intermediación financiera", "Agricultura, ganadería y caza", "Pesca", "Explotación de minas", "Impuestos netos de subsidios", "Electricidad, gas y agua", "Transporte y comunicaciones", "Act. inmobiliarias y empresarial", "Otras actividades servicios", "Construcción", "Enseñanza", "Servicios sociales y de salud", "Hogares privados", "Hoteles y restaurantes", "Adm. pública y defensa", "Comercio mayorista y minorista", "Industria manufacturera"],')
+    lines.append(f'    datasets: [')
+    lines.append(f'      {{label:"Var. % interanual", data:[17.2, 16.1, 10.6, 8.1, 5.5, 4.7, 2.2, 2.0, 1.1, 0.9, 0.6, 0.3, 0.0, -0.7, -1.1, -2.2, -5.0], color:"CONDITIONAL_H", dash:false}}')
+    lines.append(f'    ]')
+    lines.append(f'  }}')
+
+    lines.append("};")
+    return "\n".join(lines)
 
 
 # ── Hash + change detection ───────────────────────────────────────────────────
 
-def compute_hash(sections: list) -> str:
-    blob = json.dumps(sections, sort_keys=True, ensure_ascii=False, default=str)
+def compute_hash(ipc, devaluation, pbi, fx, disc) -> str:
+    blob = json.dumps(
+        {"ipc": ipc, "dev": devaluation, "pbi": pbi, "fx": fx, "disc": disc},
+        sort_keys=True, ensure_ascii=False, default=str
+    )
     return hashlib.sha256(blob.encode()).hexdigest()
 
 
@@ -462,16 +374,38 @@ def save_hash(new_hash: str):
     HASH_FILE.write_text(new_hash)
 
 
-# ── Render HTML ───────────────────────────────────────────────────────────────
+# ── Surgical HTML update ───────────────────────────────────────────────────────
 
-def render_html(sections: list) -> str:
-    env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)), autoescape=False)
-    tmpl = env.get_template("report.html.j2")
-    return tmpl.render(
-        sections=sections,
-        chart_data_json=json.dumps(sections, ensure_ascii=False),
-        generated_at=datetime.utcnow().strftime("%-d de %B, %Y — %H:%M UTC"),
+def update_html(charts_js: str):
+    html = INDEX_HTML.read_text(encoding="utf-8")
+
+    # Replace var CHARTS = {...}; block
+    new_html = re.sub(
+        r"var CHARTS = \{.*?\};",
+        charts_js,
+        html,
+        count=1,
+        flags=re.DOTALL,
     )
+    if new_html == html:
+        print("WARNING: Could not find var CHARTS block to replace", file=sys.stderr)
+
+    # Update header date
+    today = datetime.utcnow()
+    MONTHS_ES_LONG = {
+        1: "enero", 2: "febrero", 3: "marzo", 4: "abril",
+        5: "mayo", 6: "junio", 7: "julio", 8: "agosto",
+        9: "septiembre", 10: "octubre", 11: "noviembre", 12: "diciembre",
+    }
+    date_str = f"{today.day} de {MONTHS_ES_LONG[today.month]}, {today.year}"
+    new_html = re.sub(
+        r'(<span class="header-updated-date">)[^<]*(</span>)',
+        rf'\g<1>{date_str}\g<2>',
+        new_html,
+    )
+
+    INDEX_HTML.write_text(new_html, encoding="utf-8")
+    print(f"Report updated successfully. Date set to: {date_str}")
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -482,6 +416,7 @@ def main():
     if not creds_json or not file_id:
         print("Secrets GOOGLE_SHEETS_CREDENTIALS / SHEET_FILE_ID not configured. Skipping update.")
         sys.exit(0)
+
     print("Downloading Excel from Google Drive...")
     file_bytes = download_excel()
 
@@ -499,20 +434,16 @@ def main():
     print(f"  FX Rate rows: {len(fx)}")
     print(f"  Discriminada rows: {len(disc)}")
 
-    sections = build_chart_payload(ipc, devaluation, pbi, fx, disc)
-    new_hash = compute_hash(sections)
+    new_hash = compute_hash(ipc, devaluation, pbi, fx, disc)
 
     if not has_changed(new_hash):
         print("No data changes detected. Skipping rebuild.")
         return
 
-    print("Data changed. Rebuilding HTML...")
-    html = render_html(sections)
-
-    DOCS_DIR.mkdir(exist_ok=True)
-    (DOCS_DIR / "index.html").write_text(html, encoding="utf-8")
+    print("Data changed. Updating HTML surgically...")
+    charts_js = build_charts_js(ipc, devaluation, pbi, fx, disc)
+    update_html(charts_js)
     save_hash(new_hash)
-    print("Report rebuilt successfully.")
 
 
 if __name__ == "__main__":
