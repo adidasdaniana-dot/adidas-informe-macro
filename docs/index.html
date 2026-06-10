@@ -860,7 +860,7 @@ function buildConfig(chartId, fromIdx, toIdx) {
           backgroundColor: '#000', titleColor: '#fff', bodyColor: '#ccc', padding: 10,
           callbacks: {
             label: function(ctx) {
-              var v = ctx.parsed.y;
+              var v = isH ? ctx.parsed.x : ctx.parsed.y;
               if (v === null || v === undefined) return null;
               return ' ' + ctx.dataset.label + ': ' + v + (chart.yLabel === '%' ? '%' : ' ' + chart.yLabel);
             }
@@ -870,6 +870,7 @@ function buildConfig(chartId, fromIdx, toIdx) {
       scales: {
         x: {
           grid: { display: false },
+          grace: isH ? '12%' : undefined,
           ticks: isH
             ? { font: { size: 10 }, callback: function(v) { return parseFloat(v.toFixed(2)) + (chart.yLabel === '%' ? '%' : ' ' + chart.yLabel); } }
             : { maxRotation: 45, font: { size: 10 } }
