@@ -539,6 +539,19 @@
 
     <div class="chart-card">
       <div class="chart-card-top">
+        <div><div class="chart-card-title">IPC Anual Argentina</div><div class="chart-source">Fuente: INDEC</div></div>
+      </div>
+      <div class="time-range" id="range_ipc_anual"></div>
+      <div class="chart-container"><canvas id="canvas_ipc_anual"></canvas></div>
+      <div class="insight-box" id="insight_ipc_anual"></div>
+      <div class="download-group">
+        <button class="btn-download" onclick="downloadChart('ipc_anual','IPC_Anual_Argentina','IPC Anual Argentina','INDEC','png')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>PNG</button>
+        <button class="btn-download" onclick="downloadChart('ipc_anual','IPC_Anual_Argentina','IPC Anual Argentina','INDEC','jpg')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>JPG</button>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-card-top">
         <div><div class="chart-card-title">Crecimiento del PBI Argentina</div><div class="chart-source">Fuente: Banco Mundial / REM-BCRA</div></div>
       </div>
       <div class="time-range" id="range_pbi"></div>
@@ -742,6 +755,14 @@ var CHARTS = {
     labels: ["jul-24","ago-24","sep-24","oct-24","nov-24","dic-24","ene-25","feb-25","mar-25","abr-25","may-25","jun-25","jul-25","ago-25","sep-25","oct-25","nov-25","dic-25","ene-26","feb-26","mar-26","abr-26"],
     datasets: [
       {label:"Inflación (%)", data:[4.0,4.2,3.5,2.7,2.4,2.7,2.2,2.4,3.7,2.8,1.5,1.6,1.9,1.9,2.1,2.3,2.5,2.8,2.9,2.9,3.4,2.6], color:"#000000", dash:false}
+    ]
+  },
+  ipc_anual: {
+    title: 'IPC Anual Argentina', source: 'INDEC',
+    type: 'bar', yLabel: '%', granularity: 'year',
+    labels: ["2020","2021","2022","2023","2024","2025","2026e"],
+    datasets: [
+      {label:"Inflación anual (%)", data:[36.0,51.0,95.0,211.0,118.0,32.0,31.0], color:"#000000", dash:false}
     ]
   },
   ipc_comparativo: {
@@ -1604,6 +1625,23 @@ function renderInsights() {
       'Pico: <strong>'+mx.v+'%</strong> ('+mx.l+'). Mínimo: <strong>'+mn.v+'%</strong> ('+mn.l+'). Último dato: <strong>'+last.v+'%</strong> ('+last.l+'). '+
       (trendUp ? 'La inflación muestra repunte reciente — señal de atención sobre costos.' : 'La inflación se estabiliza en torno al 2–3% mensual.'),
       'insight-box--critical');
+  })();
+
+  // IPC Anual
+  (function() {
+    if (!CHARTS.ipc_anual) return;
+    var d = CHARTS.ipc_anual.datasets[0].data;
+    var l = CHARTS.ipc_anual.labels;
+    var pairs = d.map(function(v,i){return{v:v,l:l[i]};}).filter(function(p){return p.v!==null;});
+    if (!pairs.length) return;
+    var mx   = pairs.reduce(function(a,b){return b.v>a.v?b:a;});
+    var last = pairs[pairs.length-1];
+    var prev = pairs.length>1 ? pairs[pairs.length-2] : last;
+    var falling = last.v < prev.v;
+    setEl('insight_ipc_anual',
+      'Pico histórico: <strong>'+mx.v+'%</strong> ('+mx.l+'). Último dato: <strong>'+last.v+'%</strong> ('+last.l+'). '+
+      (falling ? 'La inflación anual muestra tendencia decreciente — contexto favorable para costos.' : 'La inflación anual se mantiene elevada.'),
+      falling ? 'insight-box--positive' : 'insight-box--critical');
   })();
 
   // PBI

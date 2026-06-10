@@ -254,6 +254,29 @@ def parse_fx_rate(xl: pd.ExcelFile) -> list:
     return results
 
 
+def parse_ipc_anual(xl: pd.ExcelFile) -> list:
+    config = json.loads(CONFIG_FILE.read_text())
+    sheet = config["sheet_names"].get("data_2", "Data 2")
+    df = pd.read_excel(xl, sheet_name=sheet, header=1)
+
+    year_col = _find_col(df.columns, "Año", "Ano", "Year", fallback_idx=0)
+    ipc_col  = _find_col(df.columns, "IPC", fallback_idx=1)
+
+    results = []
+    for _, row in df.iterrows():
+        year_raw = row[year_col] if year_col else row.iloc[0]
+        if year_raw is None or (isinstance(year_raw, float) and pd.isna(year_raw)):
+            continue
+        year_str = str(year_raw).strip()
+        if not year_str:
+            continue
+        val = _pct_to_float(row[ipc_col] if ipc_col else row.iloc[1])
+        if val is None:
+            continue
+        results.append({"year": year_str, "ipc": val})
+    return results
+
+
 def parse_inflacion_discriminada(xl: pd.ExcelFile) -> list:
     config = json.loads(CONFIG_FILE.read_text())
     df = pd.read_excel(xl, sheet_name=config["sheet_names"]["inflacion_discriminada"], header=0)
@@ -287,7 +310,7 @@ def parse_inflacion_discriminada(xl: pd.ExcelFile) -> list:
 
 # ── Build CHARTS JS block ─────────────────────────────────────────────────────
 
-def build_charts_js(ipc, devaluation, pbi, fx, disc) -> str:
+def build_charts_js(ipc, devaluation, pbi, fx, disc, ipc_anual) -> str:
     """Build the var CHARTS = {...}; JS block to inject into index.html."""
 
     ipc_dates = [r["date"] for r in ipc]
@@ -345,6 +368,9 @@ def build_charts_js(ipc, devaluation, pbi, fx, disc) -> str:
     disc_app = _pct_scale([r["app"] for r in disc])
     disc_general = [_sum_ipc(r["year"], r.get("months", [])) for r in disc]
 
+    anual_years = [r["year"] for r in ipc_anual]
+    anual_vals  = _pct_scale([r["ipc"] for r in ipc_anual])
+
     lines = ["var CHARTS = {"]
 
     lines.append(f"  ipc_nacional: {{")
@@ -353,6 +379,15 @@ def build_charts_js(ipc, devaluation, pbi, fx, disc) -> str:
     lines.append(f"    labels: {_js_str_list(ipc_dates)},")
     lines.append(f"    datasets: [")
     lines.append(f'      {{label:"Inflación (%)", data:{_js_list(ipc_nacional)}, color:"#000000", dash:false}}')
+    lines.append(f"    ]")
+    lines.append(f"  }},")
+
+    lines.append(f"  ipc_anual: {{")
+    lines.append(f"    title: 'IPC Anual Argentina', source: 'INDEC',")
+    lines.append(f"    type: 'bar', yLabel: '%', granularity: 'year',")
+    lines.append(f"    labels: {_js_str_list(anual_years)},")
+    lines.append(f"    datasets: [")
+    lines.append(f'      {{label:"Inflación anual (%)", data:{_js_list(anual_vals)}, color:"#000000", dash:false}}')
     lines.append(f"    ]")
     lines.append(f"  }},")
 
@@ -422,9 +457,9 @@ def build_charts_js(ipc, devaluation, pbi, fx, disc) -> str:
 
 # ── Hash + change detection ───────────────────────────────────────────────────
 
-def compute_hash(ipc, devaluation, pbi, fx, disc) -> str:
+def compute_hash(ipc, devaluation, pbi, fx, disc, ipc_anual) -> str:
     blob = json.dumps(
-        {"ipc": ipc, "dev": devaluation, "pbi": pbi, "fx": fx, "disc": disc},
+        {"ipc": ipc, "dev": devaluation, "pbi": pbi, "fx": fx, "disc": disc, "ipc_anual": ipc_anual},
         sort_keys=True, ensure_ascii=False, default=str
     )
     return hashlib.sha256(blob.encode()).hexdigest()
@@ -493,12 +528,14 @@ def main():
     pbi = parse_pbi(xl)
     fx = parse_fx_rate(xl)
     disc = parse_inflacion_discriminada(xl)
+    ipc_anual = parse_ipc_anual(xl)
 
     print(f"  IPC rows: {len(ipc)}")
     print(f"  Devaluation rows: {len(devaluation)}")
     print(f"  PBI rows: {len(pbi)}")
     print(f"  FX Rate rows: {len(fx)}")
     print(f"  Discriminada rows: {len(disc)}")
+    print(f"  IPC Anual rows: {len(ipc_anual)}")
 
     # Guard: abort if critical data is missing — never overwrite HTML with empty arrays
     if len(ipc) == 0 or len(devaluation) == 0:
@@ -510,14 +547,14 @@ def main():
         )
         sys.exit(1)
 
-    new_hash = compute_hash(ipc, devaluation, pbi, fx, disc)
+    new_hash = compute_hash(ipc, devaluation, pbi, fx, disc, ipc_anual)
 
     if not has_changed(new_hash):
         print("No data changes detected. Skipping rebuild.")
         return
 
     print("Data changed. Updating HTML surgically...")
-    charts_js = build_charts_js(ipc, devaluation, pbi, fx, disc)
+    charts_js = build_charts_js(ipc, devaluation, pbi, fx, disc, ipc_anual)
     update_html(charts_js)
     save_hash(new_hash)
 
