@@ -655,19 +655,19 @@
     <div class="chart-card">
       <div class="chart-card-top">
         <div>
-          <div class="chart-card-title">Variación de Participación 2022 vs. 2021 (pp)</div>
-          <div class="chart-source">Fuente: CEPAL</div>
+          <div class="chart-card-title">Variación PBG 2025 vs. 2022 (%)</div>
+          <div class="chart-source">Fuente: Equilibra</div>
         </div>
       </div>
       <div class="chart-container" style="height:420px"><canvas id="canvas_pbg_var"></canvas></div>
       <div class="insight-box">
-        <strong>Neuquén</strong> gana <strong>+0.42 pp</strong> — efecto Vaca Muerta.
-        <strong>Santa Fe</strong> pierde <strong>−0.28 pp</strong> y <strong>Córdoba</strong> <strong>−0.18 pp</strong>.
-        Buenos Aires gana terreno (+0.09 pp). Fuente: CEPAL.
+        <strong>Neuquén</strong> lidera con <strong>+36.9%</strong> — efecto Vaca Muerta.
+        <strong>CABA</strong> (<strong>+3.4%</strong>) y <strong>Salta</strong> (<strong>+2.9%</strong>) también crecen.
+        <strong>Tierra del Fuego</strong> (<strong>−13.7%</strong>), <strong>Formosa</strong> (<strong>−13.0%</strong>) y <strong>Santiago del Estero</strong> (<strong>−12.1%</strong>) registran las mayores caídas. Fuente: Equilibra.
       </div>
       <div class="download-group">
-        <button class="btn-download" onclick="downloadChart('pbg_var','PBG_Variacion_2022vs2021','PBG — Variación Participación 2022 vs 2021','INDEC — Dir. Cuentas Nacionales','png')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>PNG</button>
-        <button class="btn-download" onclick="downloadChart('pbg_var','PBG_Variacion_2022vs2021','PBG — Variación Participación 2022 vs 2021','INDEC — Dir. Cuentas Nacionales','jpg')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>JPG</button>
+        <button class="btn-download" onclick="downloadChart('pbg_var','PBG_Variacion_2025vs2022','PBG — Variación 2025 vs 2022','Equilibra','png')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>PNG</button>
+        <button class="btn-download" onclick="downloadChart('pbg_var','PBG_Variacion_2025vs2022','PBG — Variación 2025 vs 2022','Equilibra','jpg')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>JPG</button>
       </div>
     </div>
     </div>
@@ -794,7 +794,7 @@ var CHARTS = {
     type: 'bar_h_conditional', yLabel: '%', granularity: 'sector',
     labels: ["Intermediación financiera", "Agricultura, ganadería y caza", "Pesca", "Explotación de minas", "Impuestos netos de subsidios", "Electricidad, gas y agua", "Transporte y comunicaciones", "Act. inmobiliarias y empresarial", "Otras actividades servicios", "Construcción", "Enseñanza", "Servicios sociales y de salud", "Hogares privados", "Hoteles y restaurantes", "Adm. pública y defensa", "Comercio mayorista y minorista", "Industria manufacturera"],
     datasets: [
-      {label:"Var. % interanual", data:[17.2, 16.1, 10.6, 8.1, 5.5, 4.7, 2.2, 2.0, 1.1, 0.9, 0.6, 0.3, 0.0, -0.7, -1.1, -2.2, -5.0], color:"CONDITIONAL_H", dash:false}
+      {label:"Var. % interanual", data:[17.2, 16.1, 10.6, 8.1, 5.5, 4.7, 2.2, 2.0, 1.1, 0.9, 0.6, 0.3, 0.0, -0.7, -1.1, -2.2, -5.0], color:"CONDITIONAL_H_INV", dash:false}
     ]
   }
 };
@@ -1400,11 +1400,11 @@ function downloadMap(filename, format) {
 
 // PBG variation chart data
 CHARTS['pbg_var'] = {
-  title: 'Variación Participación PBG 2022 vs. 2021',
-  source: 'CEPAL',
-  type: 'bar_h_conditional', yLabel: 'pp', granularity: 'sector',
-  labels: ["Buenos Aires", "CABA", "C\u00f3rdoba", "Santa Fe", "Neuqu\u00e9n", "Mendoza", "Entre R\u00edos", "Tucum\u00e1n", "Chubut", "Salta", "Santiago del Estero", "Chaco", "R\u00edo Negro", "Santa Cruz", "Misiones", "San Juan", "Corrientes", "Jujuy", "La Pampa", "San Luis", "Tierra del Fuego", "Formosa", "Catamarca", "La Rioja"],
-  datasets: [{label:"Variación (pp)", data:[0.09, 0.01, -0.18, -0.28, 0.42, -0.07, 0.01, -0.1, -0.06, 0.0, 0.03, 0.03, -0.01, -0.02, -0.02, 0.03, -0.04, 0.06, 0.04, -0.01, 0.03, 0.01, 0.04, 0.02], color:"CONDITIONAL_H_INV", dash:false}]
+  title: 'Variación PBG 2025 vs. 2022',
+  source: 'Equilibra',
+  type: 'bar_h_conditional', yLabel: '%', granularity: 'sector',
+  labels: ["Neuqu\u00e9n", "CABA", "Salta", "Catamarca", "Santa Fe", "R\u00edo Negro", "Mendoza", "San Juan", "C\u00f3rdoba", "Entre R\u00edos", "Corrientes", "La Pampa", "Chubut", "Santa Cruz", "Buenos Aires", "Tucum\u00e1n", "Jujuy", "Misiones", "La Rioja", "Chaco", "San Luis", "Santiago del Estero", "Formosa", "Tierra del Fuego"],
+  datasets: [{label:"Variación (%)", data:[36.9, 3.4, 2.9, 2.7, 2.6, 2.4, 2.0, 0.9, 0.5, -0.6, -0.8, -0.8, -1.8, -1.9, -2.5, -3.8, -4.3, -4.5, -5.2, -6.0, -8.7, -12.1, -13.0, -13.7], color:"CONDITIONAL_H_INV", dash:false}]
 };
 
 // Init pbg_var chart (also registers colorOverrides since CHARTS['pbg_var'] was added after the main init loop)
