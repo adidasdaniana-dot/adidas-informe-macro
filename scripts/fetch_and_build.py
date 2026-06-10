@@ -368,8 +368,13 @@ def build_charts_js(ipc, devaluation, pbi, fx, disc, ipc_anual) -> str:
     disc_app = _pct_scale([r["app"] for r in disc])
     disc_general = [_sum_ipc(r["year"], r.get("months", [])) for r in disc]
 
+    # Annual IPC is stored in Excel as a decimal fraction (2.11 = 211%). The
+    # _pct_scale heuristic fails here because values exceed 0.5, so scale
+    # explicitly: any value < 10 is treated as a fraction and multiplied by 100.
     anual_years = [r["year"] for r in ipc_anual]
-    anual_vals  = _pct_scale([r["ipc"] for r in ipc_anual])
+    anual_vals  = [round(r["ipc"] * 100, 1) if r["ipc"] is not None and abs(r["ipc"]) < 10
+                   else (round(r["ipc"], 1) if r["ipc"] is not None else None)
+                   for r in ipc_anual]
 
     lines = ["var CHARTS = {"]
 
