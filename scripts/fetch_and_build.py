@@ -452,7 +452,7 @@ def build_charts_js(ipc, devaluation, pbi, fx, disc, ipc_anual) -> str:
     lines.append(f"    type: 'bar_h_conditional', yLabel: '%', granularity: 'sector',")
     lines.append(f'    labels: ["Intermediación financiera", "Agricultura, ganadería y caza", "Pesca", "Explotación de minas", "Impuestos netos de subsidios", "Electricidad, gas y agua", "Transporte y comunicaciones", "Act. inmobiliarias y empresarial", "Otras actividades servicios", "Construcción", "Enseñanza", "Servicios sociales y de salud", "Hogares privados", "Hoteles y restaurantes", "Adm. pública y defensa", "Comercio mayorista y minorista", "Industria manufacturera"],')
     lines.append(f'    datasets: [')
-    lines.append(f'      {{label:"Var. % interanual", data:[17.2, 16.1, 10.6, 8.1, 5.5, 4.7, 2.2, 2.0, 1.1, 0.9, 0.6, 0.3, 0.0, -0.7, -1.1, -2.2, -5.0], color:"CONDITIONAL_H", dash:false}}')
+    lines.append(f'      {{label:"Var. % interanual", data:[17.2, 16.1, 10.6, 8.1, 5.5, 4.7, 2.2, 2.0, 1.1, 0.9, 0.6, 0.3, 0.0, -0.7, -1.1, -2.2, -5.0], color:"CONDITIONAL_H_INV", dash:false}}')
     lines.append(f'    ]')
     lines.append(f'  }}')
 
