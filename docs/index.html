@@ -1115,8 +1115,12 @@ function downloadChart(chartId, filename, chartTitle, sourceText, format) {
   exportCanvas.height = origCanvas.height + HEADER_H + FOOTER_H;
   var ctx = exportCanvas.getContext('2d');
 
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+  var isPng = format !== 'jpg';
+  // PNG keeps a transparent background; JPG needs an opaque white fill
+  if (!isPng) {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+  }
 
   // Header: 3 bars + title
   ctx.fillStyle = '#000000';
@@ -1133,20 +1137,22 @@ function downloadChart(chartId, filename, chartTitle, sourceText, format) {
     var toLbl   = CHARTS[chartId].labels[r.to];
     ctx.font = '10px Helvetica, Arial, sans-serif';
     ctx.fillStyle = '#767677';
-    ctx.fillText(fromLbl + ' — ' + toLbl, 14 + 3*10 + 8, HEADER_H - 4);
+    ctx.fillText(fromLbl + ' a ' + toLbl, 14 + 3*10 + 8, HEADER_H - 4);
   }
 
   // Chart
   ctx.drawImage(origCanvas, 0, HEADER_H);
 
-  // Footer
-  ctx.fillStyle = '#f5f5f5';
-  ctx.fillRect(0, HEADER_H + origCanvas.height, W, FOOTER_H);
+  // Footer (transparent on PNG: skip the grey fill, only draw the text)
+  if (!isPng) {
+    ctx.fillStyle = '#f5f5f5';
+    ctx.fillRect(0, HEADER_H + origCanvas.height, W, FOOTER_H);
+  }
   ctx.fillStyle = '#767677';
   ctx.font = '10px Helvetica, Arial, sans-serif';
   ctx.fillText('Fuente: ' + sourceText + '  ·  adidas Business Development Argentina', 14, HEADER_H + origCanvas.height + 22);
 
-  var mime = format === 'jpg' ? 'image/jpeg' : 'image/png';
+  var mime = isPng ? 'image/png' : 'image/jpeg';
   var a = document.createElement('a');
   a.href = exportCanvas.toDataURL(mime, 0.95);
   a.download = 'adidas_' + filename + '.' + format;
