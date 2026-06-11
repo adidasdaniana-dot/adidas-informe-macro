@@ -1627,11 +1627,26 @@ function renderInsights() {
     btn.type = 'button';
     btn.textContent = 'Copiar';
     btn.addEventListener('click', function() {
-      var txt = el.querySelector('.insight-text').innerText;
-      navigator.clipboard.writeText(txt).then(function() {
+      var txt = el.querySelector('.insight-text').innerText.trim();
+      function feedback() {
         btn.textContent = 'Copiado';
         setTimeout(function() { btn.textContent = 'Copiar'; }, 1500);
-      });
+      }
+      function fallback() {
+        var ta = document.createElement('textarea');
+        ta.value = txt;
+        ta.style.position = 'fixed';
+        ta.style.top = '-9999px';
+        document.body.appendChild(ta);
+        ta.focus(); ta.select();
+        try { document.execCommand('copy'); feedback(); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(feedback, fallback);
+      } else {
+        fallback();
+      }
     });
     el.appendChild(btn);
   }
