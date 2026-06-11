@@ -1437,6 +1437,13 @@ function downloadMap(filename, format) {
 
 
 // PBG variation chart data
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║ DATOS PROTEGIDOS — MANTENIMIENTO MANUAL                                   ║
+// ║ Fuente: Equilibra. Variación PBG 2025 vs. 2022.                          ║
+// ║ NO modificar, regenerar ni auto-resolver en rebases/merges sin pedido    ║
+// ║ EXPLÍCITO del usuario. El script fetch_and_build.py NO toca este bloque. ║
+// ║ Última actualización validada por el usuario: 2026-06.                   ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
 CHARTS['pbg_var'] = {
   title: 'Variación PBG 2025 vs. 2022',
   source: 'Equilibra',
@@ -1444,6 +1451,7 @@ CHARTS['pbg_var'] = {
   labels: ["Neuquén", "CABA", "Salta", "Catamarca", "Santa Fe", "Mendoza", "Río Negro", "San Juan", "Córdoba", "Corrientes", "Entre Ríos", "La Pampa", "Santa Cruz", "Chubut", "Buenos Aires", "Tucumán", "Misiones", "La Rioja", "Jujuy", "San Luis", "Chaco", "Santiago del Estero", "Formosa", "Tierra del Fuego"],
   datasets: [{label:"Variación (%)", data:[36.9, 3.4, 2.9, 2.7, 2.6, 2.0, 2.4, 0.9, 0.5, -0.8, -0.6, -0.8, -1.9, -1.8, -2.5, -3.8, -4.5, -5.2, -4.3, -8.7, -6.0, -12.1, -13.0, -13.7], color:"CONDITIONAL_H_INV", dash:false}]
 };
+// ── FIN DATOS PROTEGIDOS pbg_var ──────────────────────────────────────────────
 
 // Init pbg_var chart (also registers colorOverrides since CHARTS['pbg_var'] was added after the main init loop)
 (function() {
