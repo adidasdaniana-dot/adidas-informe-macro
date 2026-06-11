@@ -229,7 +229,19 @@
     .insight-box {
       background: var(--grey-light); border-left: 3px solid var(--black);
       padding: 9px 12px; margin-top: 12px; font-size: 11px; line-height: 1.65; color: #333;
+      position: relative;
     }
+    .insight-text { display: block; padding-right: 64px; }
+    .btn-copy-insight {
+      position: absolute; top: 7px; right: 8px;
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 8px; background: transparent; border: 1.5px solid currentColor;
+      color: inherit; font-family: 'AdidasFont', inherit; font-size: 8px; font-weight: 900;
+      letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+      opacity: 0.55; transition: opacity 0.12s;
+    }
+    .btn-copy-insight:hover { opacity: 1; }
+    .btn-copy-insight svg { width: 10px; height: 10px; flex-shrink: 0; }
     .insight-box--positive {
       background: #f0faf4; border-left-color: #166534; color: #14532d;
     }
@@ -467,7 +479,7 @@
   </div>
   <div class="header-right">
     <span class="header-updated-label">Última actualización</span>
-    <span class="header-updated-date">10 de junio, 2026</span>
+    <span class="header-updated-date">8 de junio, 2026</span>
     <span class="header-updated-data">Datos al 30 de abril 2026</span>
   </div>
 </header>
@@ -668,19 +680,19 @@
     <div class="chart-card">
       <div class="chart-card-top">
         <div>
-          <div class="chart-card-title">Variación PBG 2025 vs. 2022 (%)</div>
-          <div class="chart-source">Fuente: Equilibra</div>
+          <div class="chart-card-title">Variación de Participación 2022 vs. 2021 (pp)</div>
+          <div class="chart-source">Fuente: CEPAL</div>
         </div>
       </div>
       <div class="chart-container" style="height:420px"><canvas id="canvas_pbg_var"></canvas></div>
       <div class="insight-box">
-        <strong>Neuquén</strong> lidera con <strong>+36.9%</strong> — efecto Vaca Muerta.
-        <strong>CABA</strong> (<strong>+3.4%</strong>) y <strong>Salta</strong> (<strong>+2.9%</strong>) también crecen.
-        <strong>Tierra del Fuego</strong> (<strong>−13.7%</strong>), <strong>Formosa</strong> (<strong>−13.0%</strong>) y <strong>Santiago del Estero</strong> (<strong>−12.1%</strong>) registran las mayores caídas. Fuente: Equilibra.
+        <strong>Neuquén</strong> gana <strong>+0.42 pp</strong> — efecto Vaca Muerta.
+        <strong>Santa Fe</strong> pierde <strong>−0.28 pp</strong> y <strong>Córdoba</strong> <strong>−0.18 pp</strong>.
+        Buenos Aires gana terreno (+0.09 pp). Fuente: CEPAL.
       </div>
       <div class="download-group">
-        <button class="btn-download" onclick="downloadChart('pbg_var','PBG_Variacion_2025vs2022','PBG — Variación 2025 vs 2022','Equilibra','png')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>PNG</button>
-        <button class="btn-download" onclick="downloadChart('pbg_var','PBG_Variacion_2025vs2022','PBG — Variación 2025 vs 2022','Equilibra','jpg')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>JPG</button>
+        <button class="btn-download" onclick="downloadChart('pbg_var','PBG_Variacion_2022vs2021','PBG — Variación Participación 2022 vs 2021','INDEC — Dir. Cuentas Nacionales','png')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>PNG</button>
+        <button class="btn-download" onclick="downloadChart('pbg_var','PBG_Variacion_2022vs2021','PBG — Variación Participación 2022 vs 2021','INDEC — Dir. Cuentas Nacionales','jpg')"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v7M3 6l3 3 3-3M1 10h10"/></svg>JPG</button>
       </div>
     </div>
     </div>
@@ -881,7 +893,7 @@ function buildConfig(chartId, fromIdx, toIdx) {
           backgroundColor: '#000', titleColor: '#fff', bodyColor: '#ccc', padding: 10,
           callbacks: {
             label: function(ctx) {
-              var v = isH ? ctx.parsed.x : ctx.parsed.y;
+              var v = ctx.parsed.y;
               if (v === null || v === undefined) return null;
               return ' ' + ctx.dataset.label + ': ' + v + (chart.yLabel === '%' ? '%' : ' ' + chart.yLabel);
             }
@@ -890,14 +902,14 @@ function buildConfig(chartId, fromIdx, toIdx) {
       },
       scales: {
         x: {
-          grid: { display: false },
-          grace: isH ? '12%' : undefined,
+          grid: { color: '#f0f0f0' },
+          grace: isH ? '8%' : undefined,
           ticks: isH
             ? { font: { size: 10 }, callback: function(v) { return parseFloat(v.toFixed(2)) + (chart.yLabel === '%' ? '%' : ' ' + chart.yLabel); } }
             : { maxRotation: 45, font: { size: 10 } }
         },
         y: {
-          grid: { display: false },
+          grid: { color: '#f0f0f0' },
           grace: isH ? undefined : '20%',
           ticks: isH
             ? { font: { size: 9 } }
@@ -1422,11 +1434,11 @@ function downloadMap(filename, format) {
 
 // PBG variation chart data
 CHARTS['pbg_var'] = {
-  title: 'Variación PBG 2025 vs. 2022',
-  source: 'Equilibra',
-  type: 'bar_h_conditional', yLabel: '%', granularity: 'sector',
-  labels: ["Neuqu\u00e9n", "CABA", "Salta", "Catamarca", "Santa Fe", "R\u00edo Negro", "Mendoza", "San Juan", "C\u00f3rdoba", "Entre R\u00edos", "Corrientes", "La Pampa", "Chubut", "Santa Cruz", "Buenos Aires", "Tucum\u00e1n", "Jujuy", "Misiones", "La Rioja", "Chaco", "San Luis", "Santiago del Estero", "Formosa", "Tierra del Fuego"],
-  datasets: [{label:"Variación (%)", data:[36.9, 3.4, 2.9, 2.7, 2.6, 2.4, 2.0, 0.9, 0.5, -0.6, -0.8, -0.8, -1.8, -1.9, -2.5, -3.8, -4.3, -4.5, -5.2, -6.0, -8.7, -12.1, -13.0, -13.7], color:"CONDITIONAL_H_INV", dash:false}]
+  title: 'Variación Participación PBG 2022 vs. 2021',
+  source: 'CEPAL',
+  type: 'bar_h_conditional', yLabel: 'pp', granularity: 'sector',
+  labels: ["Buenos Aires", "CABA", "C\u00f3rdoba", "Santa Fe", "Neuqu\u00e9n", "Mendoza", "Entre R\u00edos", "Tucum\u00e1n", "Chubut", "Salta", "Santiago del Estero", "Chaco", "R\u00edo Negro", "Santa Cruz", "Misiones", "San Juan", "Corrientes", "Jujuy", "La Pampa", "San Luis", "Tierra del Fuego", "Formosa", "Catamarca", "La Rioja"],
+  datasets: [{label:"Variación (pp)", data:[0.09, 0.01, -0.18, -0.28, 0.42, -0.07, 0.01, -0.1, -0.06, 0.0, 0.03, 0.03, -0.01, -0.02, -0.02, 0.03, -0.04, 0.06, 0.04, -0.01, 0.03, 0.01, 0.04, 0.02], color:"CONDITIONAL_H_INV", dash:false}]
 };
 
 // Init pbg_var chart (also registers colorOverrides since CHARTS['pbg_var'] was added after the main init loop)
@@ -1604,8 +1616,9 @@ function renderInsights() {
   function setEl(id, html, cls) {
     var el = document.getElementById(id);
     if (!el) return;
-    el.innerHTML = html;
     el.className = 'insight-box' + (cls ? ' ' + cls : '');
+    var copyBtn = '<button class="btn-copy-insight" title="Copiar al portapapeles" onclick="(function(b){var t=b.closest(\'.insight-box\').querySelector(\'.insight-text\').innerText;navigator.clipboard.writeText(t).then(function(){b.textContent=\'Copiado\';setTimeout(function(){b.innerHTML=\'<svg viewBox=\\\"0 0 12 12\\\" fill=\\\"none\\\" stroke=\\\"currentColor\\\" stroke-width=\\\"1.5\\\"><rect x=\\\"1\\\" y=\\\"3\\\" width=\\\"8\\\" height=\\\"8\\\" rx=\\\"1\\\"/><path d=\\\"M3 3V2a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-1\\\"/></svg>Copiar\';},1500);});})(this)"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="8" height="8" rx="1"/><path d="M3 3V2a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-1"/></svg>Copiar</button>';
+    el.innerHTML = '<span class="insight-text">' + html + '</span>' + copyBtn;
   }
   function sign(v) { return v > 0 ? '+' : ''; }
   function absRound(v) { return Math.round(Math.abs(v) * 10) / 10; }
@@ -1623,7 +1636,7 @@ function renderInsights() {
     var trendUp = last.v > prev.v;
     setEl('insight_ipc_nacional',
       'Pico: <strong>'+mx.v+'%</strong> ('+mx.l+'). Mínimo: <strong>'+mn.v+'%</strong> ('+mn.l+'). Último dato: <strong>'+last.v+'%</strong> ('+last.l+'). '+
-      (trendUp ? 'La inflación muestra repunte reciente — señal de atención sobre costos.' : 'La inflación se estabiliza en torno al 2–3% mensual.'),
+      (trendUp ? 'La inflación muestra repunte reciente, señal de atención sobre costos.' : 'La inflación se estabiliza en torno al 2-3% mensual.'),
       'insight-box--critical');
   })();
 
@@ -1639,8 +1652,8 @@ function renderInsights() {
     var prev = pairs.length>1 ? pairs[pairs.length-2] : last;
     var falling = last.v < prev.v;
     setEl('insight_ipc_anual',
-      'Pico histórico: <strong>'+mx.v+'%</strong> ('+mx.l+'). Último dato: <strong>'+last.v+'%</strong> ('+last.l+'). '+
-      (falling ? 'La inflación anual muestra tendencia decreciente — contexto favorable para costos.' : 'La inflación anual se mantiene elevada.'),
+      'Pico historico: <strong>'+mx.v+'%</strong> ('+mx.l+'). Ultimo dato: <strong>'+last.v+'%</strong> ('+last.l+'). '+
+      (falling ? 'La inflacion anual muestra tendencia decreciente, contexto favorable para costos.' : 'La inflacion anual se mantiene elevada.'),
       falling ? 'insight-box--positive' : 'insight-box--critical');
   })();
 

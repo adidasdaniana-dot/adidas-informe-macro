@@ -308,6 +308,32 @@ def parse_inflacion_discriminada(xl: pd.ExcelFile) -> list:
     return results
 
 
+def parse_ipc_anual(xl: pd.ExcelFile) -> list:
+    config = json.loads(CONFIG_FILE.read_text())
+    sheet = config["sheet_names"].get("data_2", "Data 2")
+    df = pd.read_excel(xl, sheet_name=sheet, header=1)
+
+    year_col = _find_col(df.columns, "Año", "Ano", "Year", fallback_idx=0)
+    ipc_col  = _find_col(df.columns, "IPC", fallback_idx=1)
+
+    results = []
+    for _, row in df.iterrows():
+        year_raw = row[year_col] if year_col else row.iloc[0]
+        if year_raw is None or (isinstance(year_raw, float) and pd.isna(year_raw)):
+            continue
+        year_str = str(year_raw).strip()
+        if not year_str:
+            continue
+        val = _pct_to_float(row[ipc_col] if ipc_col else row.iloc[1])
+        if val is None:
+            continue
+        # Excel stores annual IPC as decimal fraction (2.11 = 211%); scale explicitly
+        if abs(val) < 10:
+            val = round(val * 100, 1)
+        results.append({"year": year_str, "ipc": val})
+    return results
+
+
 # ── Build CHARTS JS block ─────────────────────────────────────────────────────
 
 def build_charts_js(ipc, devaluation, pbi, fx, disc, ipc_anual) -> str:
@@ -336,6 +362,9 @@ def build_charts_js(ipc, devaluation, pbi, fx, disc, ipc_anual) -> str:
     fx_periods = [r["period"] for r in fx]
     fx_actual = [round(r["actual"], 2) if r["actual"] is not None else None for r in fx]
     fx_proj = [round(r["proyeccion"], 2) if r["proyeccion"] is not None else None for r in fx]
+
+    anual_years = [r["year"] for r in ipc_anual]
+    anual_vals  = [r["ipc"] for r in ipc_anual]
 
     # Build discriminada period labels and compute cumulative IPC for each period
     # ipc_map uses the already-scaled values (pct_scale converts 0.04 → 4.0 for Excel % cells)
